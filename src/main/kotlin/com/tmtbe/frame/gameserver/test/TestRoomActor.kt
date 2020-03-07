@@ -13,7 +13,7 @@ class TestRoomActor(name: String,
     private var status = ""
     private var maxCount = (20..30).random()
     private var nowCount = 0
-    override fun onAddedPlayer(playerActor: PlayerActor) {
+    override suspend fun onAddedPlayer(playerActor: PlayerActor) {
         sendMqttToRoom("$name: ${playerActor.name}加入了房间")
         if (getPlayerActorList().size == needPlayerCount) {
             status = "START"
@@ -21,7 +21,7 @@ class TestRoomActor(name: String,
         }
     }
 
-    override fun onRemovingPlayer(playerActor: PlayerActor) {
+    override suspend fun onRemovingPlayer(playerActor: PlayerActor) {
         sendMqttToRoom("$name: ${playerActor.name}离开了房间")
         if (getPlayerActorList().size == 1) {
             destroy()

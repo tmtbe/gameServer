@@ -23,7 +23,7 @@ abstract class Scene(
     fun getAllRoomActorName() = roomActors.keys.toList()
     fun getAllPlayerActorName() = resourceManager.getAllPlayerActorName().filter { it.startsWith("$name/") }
     fun getRoomActor(roomName: String) = roomActors[roomName]
-    fun createRoom(roomName: String) {
+    suspend fun createRoom(roomName: String) {
         matchName(roomName)
         val newRoomName = "$name/$roomName"
         val roomActor = roomActor.getConstructor(String::class.java,
@@ -35,7 +35,7 @@ abstract class Scene(
         onRoomCreate(roomActor)
     }
 
-    fun createPlayer(roomName: String, playerName: String) {
+    suspend fun createPlayer(roomName: String, playerName: String) {
         matchName(playerName)
         matchName(roomName)
         val newRoomName = "$name/$roomName"
@@ -49,7 +49,7 @@ abstract class Scene(
         resourceManager.addActor(playerActor)
     }
 
-    fun removeActor(name: String) {
+    suspend fun removeActor(name: String) {
         val actor = resourceManager.getActor(name)
         roomActors.remove(name)
         if (actor != null) {
@@ -58,8 +58,8 @@ abstract class Scene(
         }
     }
 
-    abstract fun onRoomCreate(roomActor: RoomActor)
-    abstract fun onRoomDestroy(roomActor: RoomActor)
+    abstract suspend fun onRoomCreate(roomActor: RoomActor)
+    abstract suspend fun onRoomDestroy(roomActor: RoomActor)
 
     companion object {
         private const val regEx = "[ _`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t"

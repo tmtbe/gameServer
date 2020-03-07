@@ -14,11 +14,11 @@ class TestScene(resourceManager: ResourceManager) : Scene(
         resourceManager
 ) {
     val log = log()
-    override fun onRoomCreate(roomActor: RoomActor) {
+    override suspend fun onRoomCreate(roomActor: RoomActor) {
         log.info("${roomActor.name}:创建了")
     }
 
-    override fun onRoomDestroy(roomActor: RoomActor) {
+    override suspend fun onRoomDestroy(roomActor: RoomActor) {
         log.info("${roomActor.name}:销毁了")
     }
 }

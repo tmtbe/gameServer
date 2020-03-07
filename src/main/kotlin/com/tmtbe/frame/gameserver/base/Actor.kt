@@ -92,15 +92,15 @@ abstract class Actor(var name: String, val scene: Scene, val resourceManager: Re
 
     protected abstract suspend fun handleMqttMsg(msg: MqttMsg)
 
-    protected abstract fun onRemoving(parent: Actor)
+    protected abstract suspend fun onRemoving(parent: Actor)
 
-    protected abstract fun onAdded(parent: Actor)
+    protected abstract suspend fun onAdded(parent: Actor)
 
-    protected abstract fun onAddedChild(child: Actor)
+    protected abstract suspend fun onAddedChild(child: Actor)
 
-    protected abstract fun onRemovingChild(child: Actor)
+    protected abstract suspend fun onRemovingChild(child: Actor)
 
-    fun addChild(child: Actor) {
+    suspend fun addChild(child: Actor) {
         if (child.parent != null) error("错误操作，不允许加入")
         children[child.name] = child
         child.parent = this
@@ -108,12 +108,12 @@ abstract class Actor(var name: String, val scene: Scene, val resourceManager: Re
         this.onAddedChild(child)
     }
 
-    fun removeChild(child: Actor) {
+    suspend fun removeChild(child: Actor) {
         children.remove(child.name)
         child.destroy()
     }
 
-    fun removeChild(name: String) {
+    suspend fun removeChild(name: String) {
         val actor = children[name]
         if (actor != null) {
             children.remove(name)
@@ -127,7 +127,7 @@ abstract class Actor(var name: String, val scene: Scene, val resourceManager: Re
         }
     }
 
-    open fun destroy() {
+    open suspend fun destroy() {
         if (isStartDestroy) return
         job?.cancel()
         isStartDestroy = true
@@ -208,6 +208,13 @@ class RequestMsg<T, E>(val request: E) : ActorMsg() {
     suspend fun send(msg: T) {
         GlobalScope.launch(coroutineContext) {
             channel.send(msg)
+        }
+    }
+
+    suspend fun after(time: Long, callback: () -> Unit) {
+        GlobalScope.launch(coroutineContext) {
+            delay(time)
+            callback()
         }
     }
 }

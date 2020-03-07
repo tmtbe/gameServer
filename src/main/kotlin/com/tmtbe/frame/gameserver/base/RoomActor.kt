@@ -27,30 +27,30 @@ abstract class RoomActor(
         }
     }
 
-    protected abstract fun onAddedPlayer(playerActor: PlayerActor)
-    protected abstract fun onRemovingPlayer(playerActor: PlayerActor)
+    protected abstract suspend fun onAddedPlayer(playerActor: PlayerActor)
+    protected abstract suspend fun onRemovingPlayer(playerActor: PlayerActor)
 
-    protected override fun onAddedChild(child: Actor) {
+    protected override suspend fun onAddedChild(child: Actor) {
         if (child is PlayerActor) {
             onAddedPlayer(child)
         }
     }
 
-    protected override fun onRemovingChild(child: Actor) {
+    protected override suspend fun onRemovingChild(child: Actor) {
         if (child is PlayerActor) {
             onRemovingPlayer(child)
         }
     }
 
-    protected override fun onRemoving(parent: Actor) {
+    protected override suspend fun onRemoving(parent: Actor) {
 
     }
 
-    protected override fun onAdded(parent: Actor) {
+    protected override suspend fun onAdded(parent: Actor) {
 
     }
 
-    override fun destroy() {
+    override suspend fun destroy() {
         scene.removeActor(this.name)
         if (!isStartDestroy) {
             scene.onRoomDestroy(this)

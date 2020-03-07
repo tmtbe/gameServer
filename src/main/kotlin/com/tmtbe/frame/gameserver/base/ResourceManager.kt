@@ -53,7 +53,7 @@ class ResourceManager(
                 .send();
     }
 
-    fun removeActor(name: String) {
+    suspend fun removeActor(name: String) {
         val actor = actorMap[name]
         if (actor != null) {
             actorMap.remove(actor.name)
@@ -62,11 +62,11 @@ class ResourceManager(
         }
     }
 
-    fun removeActor(actor: Actor) {
+    suspend fun removeActor(actor: Actor) {
         removeActor(actor.name)
     }
 
-    fun removeAllActor() {
+    suspend fun removeAllActor() {
         val keys = actorMap.keys.toList()
         for (element in keys) {
             actorMap[element]?.destroy()

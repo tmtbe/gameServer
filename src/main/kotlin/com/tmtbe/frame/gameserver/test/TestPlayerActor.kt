@@ -60,11 +60,11 @@ class TestPlayerActor(name: String,
         }
     }
 
-    override fun onRemoving(parent: Actor) {
+    override suspend fun onRemoving(parent: Actor) {
 
     }
 
-    override fun onAdded(parent: Actor) {
+    override suspend fun onAdded(parent: Actor) {
 
     }
 }
