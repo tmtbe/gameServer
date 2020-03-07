@@ -2,7 +2,7 @@ spring:
   mqtt:
     username: admin
     password: admin
-    host: 152.32.226.215
+    host: 127.0.0.1
     port: 1883
     client:
       id: admin
