@@ -12,7 +12,7 @@ class TestPlayerActor(name: String,
     private var status = ""
     override suspend fun handleRequestMsg(msg: RequestMsg<Any, Any>): Boolean {
         msg.registerEverySecondHandle {
-            getRoomActor().sendToRoom("${name}: 倒计时 ${4 - it / 1000} 秒")
+            getRoomActor().sendMqttToRoom("${name}: 倒计时 ${4 - it / 1000} 秒")
         }
         msg.timeOut(time = 4000, default = {
             "${name}: 超时后机器人处理"

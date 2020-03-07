@@ -14,15 +14,15 @@ class TestRoomActor(name: String,
     private var maxCount = (20..30).random()
     private var nowCount = 0
     override fun onAddedPlayer(playerActor: PlayerActor) {
-        sendToRoom("$name: ${playerActor.name}加入了房间")
+        sendMqttToRoom("$name: ${playerActor.name}加入了房间")
         if (getPlayerActorList().size == needPlayerCount) {
             status = "START"
-            sendToRoom("$name: 开始")
+            sendMqttToRoom("$name: 开始")
         }
     }
 
     override fun onRemovingPlayer(playerActor: PlayerActor) {
-        sendToRoom("$name: ${playerActor.name}离开了房间")
+        sendMqttToRoom("$name: ${playerActor.name}离开了房间")
         if (getPlayerActorList().size == 1) {
             destroy()
         }
@@ -37,17 +37,17 @@ class TestRoomActor(name: String,
             "START" -> {
                 delay(1000)
                 getPlayerActorList().forEach { player ->
-                    sendToRoom("${name}: need actor ${player.name} msg")
+                    sendMqttToRoom("${name}: need actor ${player.name} msg")
                     val result = player.request<CMDPayload, String>(CMDPayload("GET"))
                     if (result != null) {
-                        sendToRoom(result)
+                        sendMqttToRoom(result)
                     }
                 }
                 nowCount++
                 if (nowCount > maxCount) status = "GAME_OVER"
             }
             "GAME_OVER" -> {
-                sendToRoom("$name: 结束")
+                sendMqttToRoom("$name: 结束")
                 getPlayerActorList().forEach { player ->
                     player.send(NoticeMsg(CMDPayload("GAME_OVER")))
                 }

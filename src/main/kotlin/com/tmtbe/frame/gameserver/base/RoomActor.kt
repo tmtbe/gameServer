@@ -12,7 +12,7 @@ abstract class RoomActor(
         return children.values.filterIsInstance<PlayerActor>()
     }
 
-    fun sendToRoom(data: String) {
+    fun sendMqttToRoom(data: String) {
         getMqttGatWay().sendToMqtt(data, name)
     }
 
@@ -20,7 +20,7 @@ abstract class RoomActor(
         return children[playerName] as PlayerActor?
     }
 
-    fun sendToPlayer(playerName: String, data: String) {
+    fun sendMqttToPlayer(playerName: String, data: String) {
         val playerActor = getPlayerActor(playerName)
         if (playerActor != null) {
             getMqttGatWay().sendToMqtt(data, playerActor.name)
