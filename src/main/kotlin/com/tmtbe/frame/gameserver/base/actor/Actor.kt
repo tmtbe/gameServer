@@ -1,8 +1,10 @@
 package com.tmtbe.frame.gameserver.base.actor
 
+import com.tmtbe.frame.gameserver.base.mqtt.MqttGateWay
+import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
-import com.tmtbe.frame.gameserver.base.mqtt.MqttGateWay
+import com.tmtbe.frame.gameserver.base.utils.SpringUtils
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
@@ -14,7 +16,12 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.coroutineContext
 
 @InternalCoroutinesApi
-abstract class Actor(var name: String, val scene: Scene, val resourceManager: ResourceManager) {
+abstract class Actor(
+        var name: String,
+        val scene: Scene
+) {
+    protected var resourceManager: ResourceManager = SpringUtils.getBean(ResourceManager::class.java)
+    protected var topicTemplate: TopicTemplate = SpringUtils.getBean(TopicTemplate::class.java)
     private var requestMsgList: LinkedList<RequestMsg<Any, Any>> = LinkedList()
     var parent: Actor? = null
     val children: ConcurrentHashMap<String, Actor> = ConcurrentHashMap()

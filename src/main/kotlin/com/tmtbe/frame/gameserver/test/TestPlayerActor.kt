@@ -8,9 +8,8 @@ import kotlinx.coroutines.delay
 
 @InternalCoroutinesApi
 class TestPlayerActor(name: String,
-                      scene: Scene,
-                      resourceManager: ResourceManager
-) : PlayerActor(name, scene, resourceManager) {
+                      scene: Scene
+) : PlayerActor(name, scene) {
     private var status: String = "NORAML"
     override suspend fun handleRequestMsg(msg: RequestMsg<Any, Any>): Boolean {
         msg.registerEverySecondHandle {

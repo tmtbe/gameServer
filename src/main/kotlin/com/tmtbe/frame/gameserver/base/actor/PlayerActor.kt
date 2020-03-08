@@ -7,9 +7,8 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 abstract class PlayerActor(
         name: String,
-        scene: Scene,
-        resourceManager: ResourceManager
-) : Actor(name, scene, resourceManager) {
+        scene: Scene
+) : Actor(name, scene) {
     var sceneName: String
     var roomName: String
     var playerName: String
@@ -26,7 +25,7 @@ abstract class PlayerActor(
     }
 
     fun sendMqttToPlayer(data: String) {
-        getMqttGatWay().sendToMqtt(data, name)
+        getRoomActor().sendMqttToPlayer(playerName, data)
     }
 
     fun sendMqttToRoom(data: String) {

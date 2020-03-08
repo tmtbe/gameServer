@@ -19,8 +19,8 @@ class CreateRoomMsgBing(
 
     override suspend fun handleMessage(mqttMessage: MqttMessage<CreateRoomMsg>) {
         val requestChannel = mqttMessage.topicParse.topicChannel as TopicTemplate.RequestChannel
-        roomService.createRoom(mqttMessage.topicParse.scene, "room11")
-        roomService.playerInterRoom(requestChannel.getName(), mqttMessage.topicParse.scene, "room11")
+        roomService.createRoom(mqttMessage.topicParse.scene, "room13")
+        roomService.playerInterRoom(requestChannel.getName(), mqttMessage.topicParse.scene, "room13")
     }
 
     class CreateRoomMsg {

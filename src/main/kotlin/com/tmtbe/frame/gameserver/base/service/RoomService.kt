@@ -19,13 +19,13 @@ class RoomService(
         val scene = resourceManager.getScene(sceneName)!!
         val roomActor = scene.getRoomActor("$sceneName/$roomName") ?: error("room 不存在")
         val playerActor = roomActor.getPlayerActor("$sceneName/$roomName/$playerName")
-        if (playerActor == null) {
-            scene.createPlayer(roomName, playerName)
-        }
         val createTopic = topicTemplate.createTopic(
                 TopicTemplate.RoomChannel(roomName), sceneName, resourceManager.serverName
         )
         emqService.subscribe(playerName, createTopic)
+        if (playerActor == null) {
+            scene.createPlayer(roomName, playerName)
+        }
     }
 
     suspend fun playerOuterRoom(playerName: String, sceneName: String, roomName: String) {

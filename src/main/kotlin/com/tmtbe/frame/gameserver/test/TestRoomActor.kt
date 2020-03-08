@@ -8,9 +8,8 @@ import kotlinx.coroutines.delay
 
 @InternalCoroutinesApi
 class TestRoomActor(name: String,
-                    scene: Scene,
-                    resourceManager: ResourceManager
-) : RoomActor(name, scene, resourceManager) {
+                    scene: Scene
+) : RoomActor(name, scene) {
     private val needPlayerCount = 8
     private var status = ""
     private var maxCount = (20..30).random()

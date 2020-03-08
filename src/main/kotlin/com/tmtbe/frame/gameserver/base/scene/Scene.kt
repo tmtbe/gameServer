@@ -28,10 +28,8 @@ abstract class Scene(
     suspend fun createRoom(roomName: String) {
         matchName(roomName)
         val newRoomName = "$name/$roomName"
-        val roomActor = roomActor.getConstructor(String::class.java,
-                        Scene::class.java,
-                        ResourceManager::class.java)
-                .newInstance(newRoomName, this, resourceManager!!) as RoomActor
+        val roomActor = roomActor.getConstructor(String::class.java, Scene::class.java)
+                .newInstance(newRoomName, this) as RoomActor
         resourceManager!!.addActor(roomActor)
         roomActors[newRoomName] = roomActor
         onRoomCreate(roomActor)
@@ -43,10 +41,8 @@ abstract class Scene(
         val newRoomName = "$name/$roomName"
         val newPlayerName = "$newRoomName/$playerName"
         val roomActor = resourceManager!!.getActor(newRoomName) ?: error("不存在的room")
-        val playerActor = playerActor.getConstructor(String::class.java,
-                        Scene::class.java,
-                        ResourceManager::class.java)
-                .newInstance(newPlayerName, this, resourceManager!!) as PlayerActor
+        val playerActor = playerActor.getConstructor(String::class.java, Scene::class.java)
+                .newInstance(newPlayerName, this) as PlayerActor
         roomActor.addChild(playerActor)
         resourceManager!!.addActor(playerActor)
         return playerActor

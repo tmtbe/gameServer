@@ -1,5 +1,6 @@
 package com.tmtbe.frame.gameserver.base.actor
 
+import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -7,9 +8,8 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 abstract class RoomActor(
         name: String,
-        scene: Scene,
-        resourceManager: ResourceManager
-) : Actor(name, scene, resourceManager) {
+        scene: Scene
+) : Actor(name, scene) {
     var sceneName: String
     var roomName: String
 
@@ -24,7 +24,9 @@ abstract class RoomActor(
     }
 
     fun sendMqttToRoom(data: String) {
-        getMqttGatWay().sendToMqtt(data, name)
+        getMqttGatWay().sendToMqtt(data,
+                topicTemplate.createTopic(TopicTemplate.RoomChannel(roomName),
+                        sceneName, resourceManager.serverName))
     }
 
     fun getPlayerActor(playerName: String): PlayerActor? {
@@ -34,7 +36,9 @@ abstract class RoomActor(
     fun sendMqttToPlayer(playerName: String, data: String) {
         val playerActor = getPlayerActor(playerName)
         if (playerActor != null) {
-            getMqttGatWay().sendToMqtt(data, playerActor.name)
+            getMqttGatWay().sendToMqtt(data,
+                    topicTemplate.createTopic(TopicTemplate.ResponseChannel(playerName),
+                            sceneName, resourceManager.serverName))
         }
     }
 
