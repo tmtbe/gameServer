@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class Runner(val resourceManager: ResourceManager) : CommandLineRunner {
     override fun run(vararg args: String?) {
-        GlobalScope.launch {
+       /* GlobalScope.launch {
             val scene = resourceManager.getScene("test")!!
             for (i in 1..500) {
                 scene.createRoom("room$i")
@@ -22,6 +22,6 @@ class Runner(val resourceManager: ResourceManager) : CommandLineRunner {
                     delay(1)
                 }
             }
-        }
+        }*/
     }
 }

@@ -15,7 +15,7 @@ class TopicTemplate {
     fun parseTopic(topic: String): TopicParse {
         val split = topic.split("/")
         if (split.size < 4) {
-            error("topic格式不正确")
+            error("topic格式不正确:$topic")
         } else {
             val (topicChannelType, topicChannelName, scene, server) = split
             return when (TopicChannelType.valueOf(topicChannelType)) {
