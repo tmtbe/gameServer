@@ -40,6 +40,7 @@ class ResourceManager(sceneList: List<Scene>) {
     fun getAllSceneName() = sceneMap.keys().toList()
 
     fun addActor(actor: Actor) {
+        if (actorMap.contains(actor.name)) error("重复名称的Actor：${actor.name}")
         actor.mqttGateways.addAll(mqttGateWays)
         actorMap[actor.name] = actor
     }
@@ -78,5 +79,17 @@ class ResourceManager(sceneList: List<Scene>) {
 
     fun registerMqttGateWay(mqttGateWay: MqttGateWay) {
         this.mqttGateWays.add(mqttGateWay)
+    }
+
+    fun onPlayerConnected(username: String) {
+        sceneMap.forEach {
+            it.value.onPlayerConnected(username)
+        }
+    }
+
+    fun onPlayerDisconnected(username: String) {
+        sceneMap.forEach {
+            it.value.onPlayerDisconnected(username)
+        }
     }
 }

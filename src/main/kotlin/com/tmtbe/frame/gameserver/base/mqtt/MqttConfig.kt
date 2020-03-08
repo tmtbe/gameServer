@@ -7,6 +7,7 @@ import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth
 import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3Connect
+import com.tmtbe.frame.gameserver.base.mqtt.sub.SubscribeTopic
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.utils.log
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -40,7 +41,7 @@ class MqttConfig {
     @InternalCoroutinesApi
     @Bean
     fun mqtt3Client(
-            subscribeWithList: List<SubscribeWith>,
+            subscribeTopicList: List<SubscribeTopic>,
             mqttMessageBindingList: List<MqttMessageBinding<*>>,
             topicTemplate: TopicTemplate
     ): Mqtt3BlockingClient {
@@ -53,7 +54,7 @@ class MqttConfig {
                 .simpleAuth(Mqtt3SimpleAuth.builder()
                         .username(username).password(password.toByteArray())
                         .build()).build())
-        client.toAsync().publishes(MqttGlobalPublishFilter.ALL) { pub ->
+        client.toAsync().publishes(MqttGlobalPublishFilter.UNSOLICITED) { pub ->
             val topic: String = pub.topic.toString()
             val buffer = pub.payload.get()
             val payload = Charset.defaultCharset().decode(buffer).toString()
@@ -66,12 +67,28 @@ class MqttConfig {
             binding?.buildMessage(parseTopic, parseObject)
             if (binding == null) log.warn("丢弃一个无效信息：$payload")
         }
-        subscribeWithList.map { it.subWith() }.flatten().forEach { subWith ->
-            log.info("添加订阅：$subWith")
-            client.toAsync().subscribeWith()
-                    .topicFilter(subWith)
-                    .qos(MqttQos.AT_LEAST_ONCE)
-                    .send();
+        subscribeTopicList.forEach { sub ->
+            if (sub.interrupt()) {
+                sub.subTopics().forEach { topic ->
+                    client.toAsync().subscribeWith()
+                            .topicFilter(topic)
+                            .qos(MqttQos.AT_LEAST_ONCE)
+                            .callback {
+                                sub.handle(SubscribeTopic.MqttSubscribeMessage(it.topic.toString(),
+                                        Charset.defaultCharset().decode(it.payload.get()).toString()))
+                            }
+                            .send();
+                    log.info("添加订阅：$topic")
+                }
+            } else {
+                sub.subTopics().forEach { topic ->
+                    client.toAsync().subscribeWith()
+                            .topicFilter(topic)
+                            .qos(MqttQos.AT_LEAST_ONCE)
+                            .send();
+                    log.info("添加订阅：$topic")
+                }
+            }
         }
         return client
     }

@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component
 
 @InternalCoroutinesApi
 @Component
-class CreateRoomMsgBing(
+class CreateRoomMsgBind(
         val roomService: RoomService
-) : MqttMessageBinding<CreateRoomMsgBing.CreateRoomMsg>() {
+) : MqttMessageBinding<CreateRoomMsgBind.CreateRoomMsg>() {
 
     override fun getType() = "CREATE_ROOM"
 
@@ -19,8 +19,9 @@ class CreateRoomMsgBing(
 
     override suspend fun handleMessage(mqttMessage: MqttMessage<CreateRoomMsg>) {
         val requestChannel = mqttMessage.topicParse.topicChannel as TopicTemplate.RequestChannel
-        roomService.createRoom(mqttMessage.topicParse.scene, "room13")
-        roomService.playerInterRoom(requestChannel.getName(), mqttMessage.topicParse.scene, "room13")
+        val roomName = System.currentTimeMillis().toString()
+        roomService.createRoom(mqttMessage.topicParse.scene, roomName)
+        roomService.playerInterRoom(requestChannel.getName(), mqttMessage.topicParse.scene, roomName)
     }
 
     class CreateRoomMsg {

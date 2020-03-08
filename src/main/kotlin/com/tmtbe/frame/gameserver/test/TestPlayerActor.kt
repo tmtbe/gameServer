@@ -1,7 +1,6 @@
 package com.tmtbe.frame.gameserver.test
 
 import com.tmtbe.frame.gameserver.base.actor.*
-import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -19,6 +18,14 @@ class TestPlayerActor(name: String,
             "${name}: 超时后机器人处理"
         })
         return false
+    }
+
+    override fun onConnected() {
+        println("onConnected")
+    }
+
+    override fun onDisconnected() {
+        println("onDisconnected")
     }
 
     override suspend fun onCreate() {

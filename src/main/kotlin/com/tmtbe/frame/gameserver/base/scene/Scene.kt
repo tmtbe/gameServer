@@ -17,6 +17,7 @@ abstract class Scene(
     var resourceManager: ResourceManager? = null
 
     private val roomActors: ConcurrentHashMap<String, RoomActor> = ConcurrentHashMap()
+    private val playerActors: ConcurrentHashMap<String, PlayerActor> = ConcurrentHashMap()
 
     init {
         matchName(name)
@@ -38,19 +39,24 @@ abstract class Scene(
     suspend fun createPlayer(roomName: String, playerName: String): PlayerActor {
         matchName(playerName)
         matchName(roomName)
+        if (playerActors.containsKey(playerName)) error("玩家同一个游戏只允许进入一个房间:$playerName")
         val newRoomName = "$name/$roomName"
         val newPlayerName = "$newRoomName/$playerName"
         val roomActor = resourceManager!!.getActor(newRoomName) ?: error("不存在的room")
         val playerActor = playerActor.getConstructor(String::class.java, Scene::class.java)
                 .newInstance(newPlayerName, this) as PlayerActor
-        roomActor.addChild(playerActor)
+        playerActors[playerName] = playerActor
         resourceManager!!.addActor(playerActor)
+        roomActor.addChild(playerActor)
         return playerActor
     }
 
     suspend fun removeActor(name: String) {
         val actor = resourceManager!!.getActor(name)
-        roomActors.remove(name)
+        when (actor) {
+            is RoomActor -> roomActors.remove(name)
+            is PlayerActor -> playerActors.remove(actor.playerName)
+        }
         if (actor != null) {
             resourceManager!!.removeActor(actor.name)
             actor.destroy()
@@ -67,5 +73,13 @@ abstract class Scene(
             val m: Matcher = p.matcher(name)
             if (m.find()) error("非法名称")
         }
+    }
+
+    fun onPlayerConnected(username: String) {
+        playerActors[username]?.onConnected()
+    }
+
+    fun onPlayerDisconnected(username: String) {
+        playerActors[username]?.onDisconnected()
     }
 }

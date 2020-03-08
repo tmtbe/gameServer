@@ -1,7 +1,8 @@
 package com.tmtbe.frame.gameserver.base.actor
 
-import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
+import com.tmtbe.frame.gameserver.base.service.RoomService
+import com.tmtbe.frame.gameserver.base.utils.SpringUtils
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @InternalCoroutinesApi
@@ -9,6 +10,8 @@ abstract class PlayerActor(
         name: String,
         scene: Scene
 ) : Actor(name, scene) {
+    @Volatile
+    private var isStartDestroy: Boolean = false
     var sceneName: String
     var roomName: String
     var playerName: String
@@ -38,5 +41,16 @@ abstract class PlayerActor(
 
     protected override suspend fun onRemovingChild(child: Actor) {
 
+    }
+
+    abstract fun onConnected()
+
+    abstract fun onDisconnected()
+
+    override suspend fun destroy() {
+        if (isStartDestroy) return
+        isStartDestroy = true
+        SpringUtils.getBean(RoomService::class.java).playerOuterRoom(playerName, sceneName, roomName)
+        super.destroy()
     }
 }

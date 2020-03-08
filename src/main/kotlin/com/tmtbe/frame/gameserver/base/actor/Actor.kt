@@ -30,7 +30,7 @@ abstract class Actor(
     private var mqttIndex: Int = 0
 
     @Volatile
-    protected var isStartDestroy: Boolean = false
+    private var isStartDestroy: Boolean = false
     private var job: Job? = null
 
     init {
@@ -111,6 +111,8 @@ abstract class Actor(
 
     suspend fun addChild(child: Actor) {
         if (child.parent != null) error("错误操作，不允许加入")
+        if (child.isStartDestroy) error("销毁状态，不允许加入")
+        if (this.isStartDestroy) error("销毁状态，不允许加入")
         children[child.name] = child
         child.parent = this
         child.onAdded(this)

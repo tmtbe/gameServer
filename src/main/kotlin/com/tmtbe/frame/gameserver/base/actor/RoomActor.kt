@@ -1,8 +1,9 @@
 package com.tmtbe.frame.gameserver.base.actor
 
 import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
-import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
+import com.tmtbe.frame.gameserver.base.service.RoomService
+import com.tmtbe.frame.gameserver.base.utils.SpringUtils
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @InternalCoroutinesApi
@@ -12,6 +13,9 @@ abstract class RoomActor(
 ) : Actor(name, scene) {
     var sceneName: String
     var roomName: String
+
+    @Volatile
+    private var isStartDestroy: Boolean = false
 
     init {
         val (_sceneName, _roomName) = name.split("/")
@@ -55,6 +59,7 @@ abstract class RoomActor(
         if (child is PlayerActor) {
             onRemovingPlayer(child)
         }
+        if (getPlayerActorList().size == 1) this.destroy()
     }
 
     protected override suspend fun onRemoving(parent: Actor) {
@@ -66,10 +71,11 @@ abstract class RoomActor(
     }
 
     override suspend fun destroy() {
+        if (isStartDestroy) return
+        isStartDestroy = true
         scene.removeActor(this.name)
-        if (!isStartDestroy) {
-            scene.onRoomDestroy(this)
-        }
+        scene.onRoomDestroy(this)
+        SpringUtils.getBean(RoomService::class.java).closeRoom(this)
         super.destroy()
     }
 }
