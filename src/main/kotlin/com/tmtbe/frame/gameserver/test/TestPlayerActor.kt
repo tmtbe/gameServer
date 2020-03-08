@@ -20,14 +20,6 @@ class TestPlayerActor(name: String,
         return false
     }
 
-    override fun onConnected() {
-        println("onConnected")
-    }
-
-    override fun onDisconnected() {
-        println("onDisconnected")
-    }
-
     override suspend fun onCreate() {
     }
 

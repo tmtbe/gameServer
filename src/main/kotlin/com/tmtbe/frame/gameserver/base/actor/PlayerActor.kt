@@ -12,6 +12,9 @@ abstract class PlayerActor(
 ) : Actor(name, scene) {
     @Volatile
     private var isStartDestroy: Boolean = false
+
+    @Volatile
+    private var isOnline: Boolean = true
     var sceneName: String
     var roomName: String
     var playerName: String
@@ -43,9 +46,13 @@ abstract class PlayerActor(
 
     }
 
-    abstract fun onConnected()
+    fun onConnected() {
+        isOnline = true
+    }
 
-    abstract fun onDisconnected()
+    fun onDisconnected() {
+        isOnline = false
+    }
 
     override suspend fun destroy() {
         if (isStartDestroy) return
