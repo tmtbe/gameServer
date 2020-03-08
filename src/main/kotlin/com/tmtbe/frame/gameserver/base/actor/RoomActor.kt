@@ -1,5 +1,7 @@
-package com.tmtbe.frame.gameserver.base
+package com.tmtbe.frame.gameserver.base.actor
 
+import com.tmtbe.frame.gameserver.base.scene.ResourceManager
+import com.tmtbe.frame.gameserver.base.scene.Scene
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @InternalCoroutinesApi
@@ -8,7 +10,16 @@ abstract class RoomActor(
         scene: Scene,
         resourceManager: ResourceManager
 ) : Actor(name, scene, resourceManager) {
-    fun getPlayerActorList(): List<Actor> {
+    var sceneName: String
+    var roomName: String
+
+    init {
+        val (_sceneName, _roomName) = name.split("/")
+        this.sceneName = _sceneName
+        this.roomName = _roomName
+    }
+
+    fun getPlayerActorList(): List<PlayerActor> {
         return children.values.filterIsInstance<PlayerActor>()
     }
 

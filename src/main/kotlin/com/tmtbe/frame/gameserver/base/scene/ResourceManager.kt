@@ -1,23 +1,34 @@
-package com.tmtbe.frame.gameserver.base
+package com.tmtbe.frame.gameserver.base.scene
 
-import com.hivemq.client.mqtt.datatypes.MqttQos
-import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient
+import com.tmtbe.frame.gameserver.base.actor.Actor
+import com.tmtbe.frame.gameserver.base.actor.MqttMsg
+import com.tmtbe.frame.gameserver.base.actor.PlayerActor
+import com.tmtbe.frame.gameserver.base.actor.RoomActor
+import com.tmtbe.frame.gameserver.base.mqtt.MqttGateWay
 import com.tmtbe.frame.gameserver.base.utils.log
-import com.tmtbe.frame.gameserver.config.MqttGateWay
 import kotlinx.coroutines.InternalCoroutinesApi
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
 
-@InternalCoroutinesApi
 @Component
-class ResourceManager(
-        val client: Mqtt3BlockingClient,
-        val mqttGateWays: List<MqttGateWay>
-) {
+@InternalCoroutinesApi
+class ResourceManager(sceneList: List<Scene>) {
+
+    @Value("\${spring.application.name}")
+    lateinit var serverName: String
+
+    private val mqttGateWays: ArrayList<MqttGateWay> = ArrayList()
     private val log = this.log()
     private val actorMap: ConcurrentHashMap<String, Actor> = ConcurrentHashMap()
     private val sceneMap: ConcurrentHashMap<String, Scene> = ConcurrentHashMap()
+
+    init {
+        sceneList.forEach {
+            registerScene(it)
+            it.resourceManager = this
+        }
+    }
 
     fun registerScene(scene: Scene) {
         sceneMap[scene.name] = scene
@@ -25,6 +36,8 @@ class ResourceManager(
     }
 
     fun getScene(name: String) = sceneMap[name]
+
+    fun getAllSceneName() = sceneMap.keys().toList()
 
     fun addActor(actor: Actor) {
         actor.mqttGateways.addAll(mqttGateWays)
@@ -35,22 +48,6 @@ class ResourceManager(
 
     fun sendMsgToActor(name: String, topic: String) {
         actorMap[name]?.send(MqttMsg(topic))
-    }
-
-    init {
-        subscribe()
-    }
-
-    private fun subscribe() {
-        client.toAsync().subscribeWith()
-                .topicFilter("SERVER/#")
-                .qos(MqttQos.AT_LEAST_ONCE)
-                .callback {
-                    val topic: String = it.topic.toString()
-                    val buffer = it.payload.get()
-                    sendMsgToActor(topic.substring(7), Charset.defaultCharset().decode(buffer).toString())
-                }
-                .send();
     }
 
     suspend fun removeActor(name: String) {
@@ -78,4 +75,8 @@ class ResourceManager(
     fun getAllPlayerActorName() = actorMap.filter { it.value is PlayerActor }.keys.toList()
 
     fun getAllRoomActorName() = actorMap.filter { it.value is RoomActor }.keys.toList()
+
+    fun registerMqttGateWay(mqttGateWay: MqttGateWay) {
+        this.mqttGateWays.add(mqttGateWay)
+    }
 }

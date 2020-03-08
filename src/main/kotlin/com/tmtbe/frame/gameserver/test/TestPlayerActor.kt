@@ -1,6 +1,8 @@
 package com.tmtbe.frame.gameserver.test
 
-import com.tmtbe.frame.gameserver.base.*
+import com.tmtbe.frame.gameserver.base.actor.*
+import com.tmtbe.frame.gameserver.base.scene.ResourceManager
+import com.tmtbe.frame.gameserver.base.scene.Scene
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 
@@ -9,7 +11,7 @@ class TestPlayerActor(name: String,
                       scene: Scene,
                       resourceManager: ResourceManager
 ) : PlayerActor(name, scene, resourceManager) {
-    private var status = ""
+    private var status: String = "NORAML"
     override suspend fun handleRequestMsg(msg: RequestMsg<Any, Any>): Boolean {
         msg.registerEverySecondHandle {
             getRoomActor().sendMqttToRoom("${name}: 倒计时 ${4 - it / 1000} 秒")
@@ -28,6 +30,9 @@ class TestPlayerActor(name: String,
             "GAME_OVER" -> {
                 delay((1000..3000).random().toLong())
                 destroy()
+            }
+            else -> {
+
             }
         }
     }

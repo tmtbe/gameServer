@@ -1,8 +1,21 @@
 spring:
+  application:
+    name: gameServer1
   mqtt:
     username: admin
     password: admin
-    host: 127.0.0.1
+    api: http://152.32.226.215:8081
+    host: 152.32.226.215
     port: 1883
     client:
       id: admin
+  redis:
+    host: 152.32.226.215
+    port: 6379
+    password: admin@123
+    lettuce:
+      pool:
+        max-active: 200 #连接池最大连接数（使用负值表示没有限制）
+        max-idle: 20 # 连接池中的最大空闲连接
+        min-idle: 5 #连接池中的最小空闲连接
+        max-wait: 1000 # 连接池最大阻塞等待时间（使用负值表示没有限制）

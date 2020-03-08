@@ -1,6 +1,8 @@
-package com.tmtbe.frame.gameserver.base
+package com.tmtbe.frame.gameserver.base.actor
 
-import com.tmtbe.frame.gameserver.config.MqttGateWay
+import com.tmtbe.frame.gameserver.base.scene.ResourceManager
+import com.tmtbe.frame.gameserver.base.scene.Scene
+import com.tmtbe.frame.gameserver.base.mqtt.MqttGateWay
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
@@ -60,7 +62,7 @@ abstract class Actor(var name: String, val scene: Scene, val resourceManager: Re
         onCreate()
         while (isActive) {
             onEventTime()
-            yield()
+            delay(100)
         }
     }
 

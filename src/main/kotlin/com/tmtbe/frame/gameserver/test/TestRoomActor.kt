@@ -1,6 +1,8 @@
 package com.tmtbe.frame.gameserver.test
 
-import com.tmtbe.frame.gameserver.base.*
+import com.tmtbe.frame.gameserver.base.actor.*
+import com.tmtbe.frame.gameserver.base.scene.ResourceManager
+import com.tmtbe.frame.gameserver.base.scene.Scene
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 
