@@ -26,7 +26,7 @@ abstract class Scene(
     fun getAllRoomActorName() = roomActors.keys.toList()
     fun getAllPlayerActorName() = resourceManager!!.getAllPlayerActorName().filter { it.startsWith("$name/") }
     fun getRoomActor(roomName: String) = roomActors[roomName]
-    suspend fun createRoom(roomName: String) {
+    suspend fun createRoom(roomName: String): RoomActor {
         matchName(roomName)
         val newRoomName = "$name/$roomName"
         val roomActor = roomActor.getConstructor(String::class.java, Scene::class.java)
@@ -34,6 +34,7 @@ abstract class Scene(
         resourceManager!!.addActor(roomActor)
         roomActors[newRoomName] = roomActor
         onRoomCreate(roomActor)
+        return roomActor
     }
 
     suspend fun createPlayer(roomName: String, playerName: String): PlayerActor {
@@ -43,6 +44,7 @@ abstract class Scene(
         val newRoomName = "$name/$roomName"
         val newPlayerName = "$newRoomName/$playerName"
         val roomActor = resourceManager!!.getActor(newRoomName) ?: error("不存在的room")
+        if ((roomActor as RoomActor).isFull()) error("房间已满人")
         val playerActor = playerActor.getConstructor(String::class.java, Scene::class.java)
                 .newInstance(newPlayerName, this) as PlayerActor
         playerActors[playerName] = playerActor
@@ -81,5 +83,9 @@ abstract class Scene(
 
     fun onPlayerDisconnected(username: String) {
         playerActors[username]?.onDisconnected()
+    }
+
+    fun hasRoom(roomName: String): Boolean {
+        return roomActors.containsKey("$name/$roomName")
     }
 }

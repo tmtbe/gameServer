@@ -10,7 +10,9 @@ import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3Connect
 import com.tmtbe.frame.gameserver.base.mqtt.sub.SubscribeTopic
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.utils.log
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -62,7 +64,7 @@ class MqttConfig {
             val parseObject = parseObject(payload)
             val type = parseObject.getString("type")
             val binding = mqttMessageBindingList.firstOrNull() { binding ->
-                binding.getType() == type
+                binding.getClassName().simpleName == type
             }
             binding?.buildMessage(parseTopic, parseObject)
             if (binding == null) log.warn("丢弃一个无效信息：$payload")
@@ -74,8 +76,10 @@ class MqttConfig {
                             .topicFilter(topic)
                             .qos(MqttQos.AT_LEAST_ONCE)
                             .callback {
-                                sub.handle(SubscribeTopic.MqttSubscribeMessage(it.topic.toString(),
-                                        Charset.defaultCharset().decode(it.payload.get()).toString()))
+                                GlobalScope.launch {
+                                    sub.handle(SubscribeTopic.MqttSubscribeMessage(it.topic.toString(),
+                                            Charset.defaultCharset().decode(it.payload.get()).toString()))
+                                }
                             }
                             .send();
                     log.info("添加订阅：$topic")

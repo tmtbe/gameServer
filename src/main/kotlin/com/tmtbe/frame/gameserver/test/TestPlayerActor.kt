@@ -4,12 +4,13 @@ import com.tmtbe.frame.gameserver.base.actor.*
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
+import java.time.Duration
 
 @InternalCoroutinesApi
 class TestPlayerActor(name: String,
                       scene: Scene
 ) : PlayerActor(name, scene) {
-    private var status: String = "NORAML"
+    private var status: String = "NORMAL"
     override suspend fun handleRequestMsg(msg: RequestMsg<Any, Any>): Boolean {
         msg.registerEverySecondHandle {
             getRoomActor().sendMqttToRoom("${name}: 倒计时 ${4 - it / 1000} 秒")
@@ -18,6 +19,10 @@ class TestPlayerActor(name: String,
             "${name}: 超时后机器人处理"
         })
         return false
+    }
+
+    override fun getMaxKeepAliveTime(): Duration {
+        return Duration.ofHours(1)
     }
 
     override suspend fun onCreate() {

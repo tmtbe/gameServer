@@ -1,4 +1,7 @@
 spring:
+  cloud:
+    discovery:
+      enabled: false
   application:
     name: gameServer1
   mqtt:
@@ -9,6 +12,10 @@ spring:
     port: 1883
     client:
       id: admin
+  rabbitmq:
+    host: 152.32.226.215
+    username: admin
+    password: password
   redis:
     host: 152.32.226.215
     port: 6379

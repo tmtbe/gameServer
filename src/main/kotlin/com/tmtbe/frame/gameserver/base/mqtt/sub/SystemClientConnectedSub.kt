@@ -15,7 +15,7 @@ class SystemClientConnectedSub(val resourceManager: ResourceManager) : Subscribe
 
     override fun interrupt(): Boolean = true
 
-    override fun handle(mqttSubscribeMessage: MqttSubscribeMessage) {
+    override suspend fun handle(mqttSubscribeMessage: MqttSubscribeMessage) {
         val clientConnectedMsg = JSON.parseObject(mqttSubscribeMessage.payload, ClientConnectedMsg::class.java)
         resourceManager.onPlayerConnected(clientConnectedMsg.username)
     }

@@ -1,10 +1,14 @@
 package com.tmtbe.frame.gameserver.base.actor
 
+import com.tmtbe.frame.gameserver.base.mqtt.MqttMessage
 import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
+import com.tmtbe.frame.gameserver.base.mqtt.getMqttMsgType
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import com.tmtbe.frame.gameserver.base.service.RoomService
 import com.tmtbe.frame.gameserver.base.utils.SpringUtils
 import kotlinx.coroutines.InternalCoroutinesApi
+import java.time.Duration
+import java.util.UUID
 
 @InternalCoroutinesApi
 abstract class RoomActor(
@@ -13,6 +17,7 @@ abstract class RoomActor(
 ) : Actor(name, scene) {
     var sceneName: String
     var roomName: String
+    val roomConfiguration: RoomConfiguration
 
     @Volatile
     private var isStartDestroy: Boolean = false
@@ -21,28 +26,37 @@ abstract class RoomActor(
         val (_sceneName, _roomName) = name.split("/")
         this.sceneName = _sceneName
         this.roomName = _roomName
+        this.roomConfiguration = provideRoomConfiguration()
     }
+
+    abstract fun provideRoomConfiguration(): RoomConfiguration
 
     fun getPlayerActorList(): List<PlayerActor> {
         return children.values.filterIsInstance<PlayerActor>()
     }
 
-    fun sendMqttToRoom(data: String) {
-        getMqttGatWay().sendToMqtt(data,
-                topicTemplate.createTopic(TopicTemplate.RoomChannel(roomName),
-                        sceneName, resourceManager.serverName))
+    fun sendMqttToRoom(body: Any) {
+        val mqttMessage = MqttMessage(UUID.randomUUID().toString(),
+                body.getMqttMsgType(), body,
+                TopicTemplate.TopicParse(TopicTemplate.RoomChannel(roomName),
+                        sceneName, resourceManager.serverName)
+        )
+        sendMqttMessage(mqttMessage)
     }
 
     fun getPlayerActor(playerName: String): PlayerActor? {
         return children[playerName] as PlayerActor?
     }
 
-    fun sendMqttToPlayer(playerName: String, data: String) {
+    fun sendMqttToPlayer(playerName: String, body: Any) {
         val playerActor = getPlayerActor(playerName)
         if (playerActor != null) {
-            getMqttGatWay().sendToMqtt(data,
-                    topicTemplate.createTopic(TopicTemplate.ResponseChannel(playerName),
-                            sceneName, resourceManager.serverName))
+            val mqttMessage = MqttMessage(UUID.randomUUID().toString(),
+                    body.getMqttMsgType(), body,
+                    TopicTemplate.TopicParse(TopicTemplate.ResponseChannel(playerName),
+                            sceneName, resourceManager.serverName)
+            )
+            sendMqttMessage(mqttMessage)
         }
     }
 
@@ -68,6 +82,22 @@ abstract class RoomActor(
 
     protected override suspend fun onAdded(parent: Actor) {
 
+    }
+
+    override fun getMaxKeepAliveTime(): Duration {
+        return roomConfiguration.maxKeepAliveTime
+    }
+
+    fun isFull(): Boolean {
+        return this.getPlayerActorList().size >= this.roomConfiguration.maxPlayerNumber
+    }
+
+    override suspend fun addChild(child: Actor) {
+        if (isFull()) {
+            child.destroy()
+            error("房间已满")
+        }
+        super.addChild(child)
     }
 
     override suspend fun destroy() {

@@ -4,6 +4,7 @@ import com.tmtbe.frame.gameserver.base.client.EMQManagerClient
 import com.tmtbe.frame.gameserver.base.client.SubscribeRequest
 import com.tmtbe.frame.gameserver.base.client.UnSubscribeRequest
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
+import com.tmtbe.frame.gameserver.base.utils.log
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Service
 
@@ -12,6 +13,7 @@ class EMQService(
         private val redisUtils: RedisUtils,
         private val emqManagerClient: EMQManagerClient
 ) {
+    private val log = log()
     suspend fun removeAllAcl(userName: String): Long {
         return redisUtils.del("mqtt_acl:$userName")
     }
@@ -33,10 +35,10 @@ class EMQService(
 
     suspend fun subscribe(userName: String, topic: String,
                           qos: Int = 1) {
-        val addAcl = addAcl(userName, topic, EMQAcl.SUBSCRIBE)
+        addAcl(userName, topic, EMQAcl.SUBSCRIBE)
         val subscribe = emqManagerClient.subscribe(SubscribeRequest(topic, qos, userName)).awaitFirst()
         if (subscribe.code != 0) {
-            error("调用订阅API错误")
+            log.warn("调用订阅API错误:$userName ${subscribe.message}")
         }
     }
 
@@ -44,7 +46,7 @@ class EMQService(
         removeAcl(userName, topic)
         val unSubscribe = emqManagerClient.unSubscribe(UnSubscribeRequest(topic, userName)).awaitFirst()
         if (unSubscribe.code != 0) {
-            error("调用取消订阅API错误")
+            log.warn("调用取消订阅API错误:$userName ${unSubscribe.message}")
         }
     }
 }

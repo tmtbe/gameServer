@@ -13,8 +13,6 @@ class LeaveRoomMsgBind(
         val roomService: RoomService
 ) : MqttMessageBinding<LeaveRoomMsgBind.LeaveRoomMsg>() {
 
-    override fun getType() = "LEAVE_ROOM"
-
     override fun getClassName(): Class<LeaveRoomMsg> = LeaveRoomMsg::class.java
 
     override suspend fun handleMessage(mqttMessage: MqttMessage<LeaveRoomMsg>) {

@@ -15,7 +15,7 @@ class SystemClientDisconnectedSub(val resourceManager: ResourceManager) : Subscr
 
     override fun interrupt(): Boolean = true
 
-    override fun handle(mqttSubscribeMessage: MqttSubscribeMessage) {
+    override suspend fun handle(mqttSubscribeMessage: MqttSubscribeMessage) {
         val clientDisConnectedMsg = JSON.parseObject(mqttSubscribeMessage.payload, ClientDisconnectedMsg::class.java)
         resourceManager.onPlayerDisconnected(clientDisConnectedMsg.username)
     }

@@ -1,6 +1,6 @@
 package com.tmtbe.frame.gameserver.base.actor
 
-import com.tmtbe.frame.gameserver.base.mqtt.MqttGateWay
+import com.tmtbe.frame.gameserver.base.mqtt.MqttMessage
 import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
@@ -11,6 +11,7 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.selects.select
 import java.lang.Long.min
+import java.time.Duration
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.coroutineContext
@@ -26,8 +27,7 @@ abstract class Actor(
     var parent: Actor? = null
     val children: ConcurrentHashMap<String, Actor> = ConcurrentHashMap()
     private lateinit var sendChannel: SendChannel<ActorMsg>
-    val mqttGateways: ArrayList<MqttGateWay> = ArrayList()
-    private var mqttIndex: Int = 0
+    private val startTime: Long = System.currentTimeMillis()
 
     @Volatile
     private var isStartDestroy: Boolean = false
@@ -35,7 +35,7 @@ abstract class Actor(
 
     init {
         job = GlobalScope.launch {
-            sendChannel = actor {
+            sendChannel = actor(coroutineContext) {
                 for (msg in channel) {
                     onReceive(msg)
                 }
@@ -44,9 +44,10 @@ abstract class Actor(
         }
     }
 
-    protected fun getMqttGatWay(): MqttGateWay {
-        mqttIndex++
-        return mqttGateways[mqttIndex % mqttGateways.size]
+    protected abstract fun getMaxKeepAliveTime(): Duration
+
+    protected fun sendMqttMessage(mqttMessage: MqttMessage<*>) {
+        resourceManager.sendMqttMessage(mqttMessage)
     }
 
     protected fun getRequestMsg(): RequestMsg<Any, Any> {
@@ -68,6 +69,7 @@ abstract class Actor(
     private suspend fun onStart(isActive: Boolean) {
         onCreate()
         while (isActive) {
+            if (System.currentTimeMillis() - startTime > getMaxKeepAliveTime().toMillis()) destroy()
             onEventTime()
             delay(100)
         }
@@ -109,7 +111,7 @@ abstract class Actor(
 
     protected abstract suspend fun onRemovingChild(child: Actor)
 
-    suspend fun addChild(child: Actor) {
+    open suspend fun addChild(child: Actor) {
         if (child.parent != null) error("错误操作，不允许加入")
         if (child.isStartDestroy) error("销毁状态，不允许加入")
         if (this.isStartDestroy) error("销毁状态，不允许加入")
@@ -177,7 +179,7 @@ abstract class Actor(
 
 sealed class ActorMsg
 class NoticeMsg<E>(val message: E) : ActorMsg()
-class MqttMsg(val payload: String) : ActorMsg()
+class MqttMsg(val payload: MqttMessage<*>) : ActorMsg()
 class RequestMsg<T, E>(val request: E) : ActorMsg() {
     var response: CompletableDeferred<T>? = null
     private var timeOutHandlers: LinkedList<(() -> Unit)> = LinkedList()

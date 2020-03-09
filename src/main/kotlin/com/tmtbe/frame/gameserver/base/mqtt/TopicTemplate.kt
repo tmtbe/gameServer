@@ -36,7 +36,12 @@ class TopicTemplate {
             var topicChannel: TopicChannel,
             val scene: String,
             val server: String
-    )
+    ) {
+        fun toTopicString(): String {
+            return "${this.topicChannel.getType().name}/${this.topicChannel.getName()}/$scene/$server"
+        }
+    }
+
 
     class RequestChannel(
             private val userName: String

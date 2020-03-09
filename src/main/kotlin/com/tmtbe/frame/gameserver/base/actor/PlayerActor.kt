@@ -30,12 +30,12 @@ abstract class PlayerActor(
         return parent as RoomActor
     }
 
-    fun sendMqttToPlayer(data: String) {
-        getRoomActor().sendMqttToPlayer(playerName, data)
+    fun sendMqttToPlayer(body: Any) {
+        getRoomActor().sendMqttToPlayer(playerName, body)
     }
 
-    fun sendMqttToRoom(data: String) {
-        getRoomActor().sendMqttToRoom(data)
+    fun sendMqttToRoom(body: Any) {
+        getRoomActor().sendMqttToRoom(body)
     }
 
     protected override suspend fun onAddedChild(child: Actor) {

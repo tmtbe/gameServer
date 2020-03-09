@@ -4,6 +4,7 @@ import com.tmtbe.frame.gameserver.base.actor.*
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
+import java.time.Duration
 
 @InternalCoroutinesApi
 class TestRoomActor(name: String,
@@ -13,6 +14,10 @@ class TestRoomActor(name: String,
     private var status = ""
     private var maxCount = (20..30).random()
     private var nowCount = 0
+    override fun provideRoomConfiguration(): RoomConfiguration {
+        return RoomConfiguration(4, Duration.ofHours(1))
+    }
+
     override suspend fun onAddedPlayer(playerActor: PlayerActor) {
         sendMqttToRoom("$name: ${playerActor.name}加入了房间")
         if (getPlayerActorList().size == needPlayerCount) {

@@ -1,6 +1,7 @@
 package com.tmtbe.frame.gameserver.base.utils
 
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -51,7 +52,7 @@ class RedisUtils(reactiveRedisTemplate: ReactiveRedisTemplate<*, *>) {
     }
 
     suspend fun get(key: String): String? {
-        return redisTemplate.opsForValue()[key].awaitFirst()
+        return redisTemplate.opsForValue()[key].awaitFirstOrNull()
     }
 
     suspend fun hPut(key: String, hKey: String, value: String): Boolean {
@@ -71,11 +72,11 @@ class RedisUtils(reactiveRedisTemplate: ReactiveRedisTemplate<*, *>) {
     }
 
     suspend fun hGet(key: String, hKey: String): String? {
-        return redisTemplate.opsForHash<String, String>()[key, hKey].awaitFirst()
+        return redisTemplate.opsForHash<String, String>()[key, hKey].awaitFirstOrNull()
     }
 
-    suspend fun hMGet(key: String, hKeys: Collection<String>): List<String> {
-        return redisTemplate.opsForHash<String, String>().multiGet(key, hKeys).awaitFirst()
+    suspend fun hMGet(key: String, hKeys: Collection<String>): List<String>? {
+        return redisTemplate.opsForHash<String, String>().multiGet(key, hKeys).awaitFirstOrNull()
     }
 
     suspend fun hDel(key: String, vararg hKey: String): Long {
@@ -106,8 +107,8 @@ class RedisUtils(reactiveRedisTemplate: ReactiveRedisTemplate<*, *>) {
         return redisTemplate.opsForList().rightPushAll(key, *values).awaitFirst()
     }
 
-    suspend fun lGet(key: String, start: Long, end: Long): List<String> {
-        return redisTemplate.opsForList().range(key, start, end).collectList().awaitFirst()
+    suspend fun lGet(key: String, start: Long, end: Long): List<String>? {
+        return redisTemplate.opsForList().range(key, start, end).collectList().awaitFirstOrNull()
     }
 
 }
