@@ -76,6 +76,10 @@ abstract class MqttMessageBinding<T> {
         responseMessage(fromMqttMessage, errorMessageBody)
         throw BreakException()
     }
+
+    fun mustNotNull(any: Any?) {
+        if (any == null) throw ErrorMessageException("协议错误缺少信息")
+    }
 }
 
 class BreakException : Exception()
@@ -88,3 +92,7 @@ data class ErrorMessage(
 )
 
 fun Any.getMqttMsgType(): String = this.javaClass.simpleName
+
+public inline fun serverError(message: Any): Nothing {
+    return throw ErrorMessageException(message.toString())
+}

@@ -15,8 +15,8 @@ interface EMQManagerClient {
     ): Mono<APIResult>
 
     @PostMapping("/api/v4/mqtt/unsubscribe")
-    fun unSubscribe(
-            @RequestBody unSubscribeRequest: UnSubscribeRequest,
+    fun unsubscribe(
+            @RequestBody unsubscribeRequest: UnsubscribeRequest,
             @RequestHeader("Authorization") auth: String = "Basic YWRtaW46cHVibGlj"
     ): Mono<APIResult>
 }
@@ -27,7 +27,7 @@ data class SubscribeRequest(
         val clientid: String
 )
 
-data class UnSubscribeRequest(
+data class UnsubscribeRequest(
         val topic: String,
         val clientid: String
 )

@@ -3,12 +3,17 @@ package com.tmtbe.frame.gameserver.base.actor
 import com.tmtbe.frame.gameserver.base.mqtt.MqttMessage
 import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
 import com.tmtbe.frame.gameserver.base.mqtt.getMqttMsgType
+import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import com.tmtbe.frame.gameserver.base.service.RoomService
 import com.tmtbe.frame.gameserver.base.utils.SpringUtils
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.util.UUID
+import kotlin.coroutines.coroutineContext
 
 @InternalCoroutinesApi
 abstract class RoomActor(
@@ -73,7 +78,9 @@ abstract class RoomActor(
         if (child is PlayerActor) {
             onRemovingPlayer(child)
         }
-        if (getPlayerActorList().size == 1) this.destroy()
+        if (getPlayerActorList().size == 1) {
+            destroy()
+        }
     }
 
     protected override suspend fun onRemoving(parent: Actor) {
@@ -95,7 +102,7 @@ abstract class RoomActor(
     override suspend fun addChild(child: Actor) {
         if (isFull()) {
             child.destroy()
-            error("房间已满")
+            serverError("房间已满")
         }
         super.addChild(child)
     }

@@ -2,7 +2,7 @@ package com.tmtbe.frame.gameserver.base.service
 
 import com.tmtbe.frame.gameserver.base.client.EMQManagerClient
 import com.tmtbe.frame.gameserver.base.client.SubscribeRequest
-import com.tmtbe.frame.gameserver.base.client.UnSubscribeRequest
+import com.tmtbe.frame.gameserver.base.client.UnsubscribeRequest
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
 import com.tmtbe.frame.gameserver.base.utils.log
 import kotlinx.coroutines.reactive.awaitFirst
@@ -42,9 +42,9 @@ class EMQService(
         }
     }
 
-    suspend fun unSubscribe(userName: String, topic: String) {
+    suspend fun unsubscribe(userName: String, topic: String) {
         removeAcl(userName, topic)
-        val unSubscribe = emqManagerClient.unSubscribe(UnSubscribeRequest(topic, userName)).awaitFirst()
+        val unSubscribe = emqManagerClient.unsubscribe(UnsubscribeRequest(topic, userName)).awaitFirst()
         if (unSubscribe.code != 0) {
             log.warn("调用取消订阅API错误:$userName ${unSubscribe.message}")
         }

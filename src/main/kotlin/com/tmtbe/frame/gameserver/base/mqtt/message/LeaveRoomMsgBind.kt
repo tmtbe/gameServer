@@ -17,7 +17,12 @@ class LeaveRoomMsgBind(
 
     override suspend fun handleMessage(mqttMessage: MqttMessage<LeaveRoomMsg>) {
         val requestChannel = mqttMessage.topicParse.topicChannel as TopicTemplate.RequestChannel
-        roomService.playerOuterRoom(requestChannel.getName(), mqttMessage.topicParse.scene, mqttMessage.body!!.roomName!!)
+        mustNotNull(mqttMessage.body)
+        roomService.playerOuterRoom(
+                requestChannel.getName(),
+                mqttMessage.topicParse.scene,
+                mqttMessage.body!!.roomName
+        )
     }
 
     data class LeaveRoomMsg(val roomName: String)

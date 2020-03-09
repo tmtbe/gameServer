@@ -87,6 +87,10 @@ class RedisUtils(reactiveRedisTemplate: ReactiveRedisTemplate<*, *>) {
         return redisTemplate.opsForHash<String, String>().hasKey(key, item).awaitFirst()
     }
 
+    suspend fun sMembers(key: String): List<String> {
+        return redisTemplate.opsForSet().members(key).collectList().awaitFirst()
+    }
+
     suspend fun sSet(key: String, vararg values: String): Long {
         return redisTemplate.opsForSet().add(key, *values).awaitFirst()
     }

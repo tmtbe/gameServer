@@ -2,6 +2,7 @@ package com.tmtbe.frame.gameserver.base.actor
 
 import com.tmtbe.frame.gameserver.base.mqtt.MqttMessage
 import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
+import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import com.tmtbe.frame.gameserver.base.utils.SpringUtils
@@ -112,9 +113,9 @@ abstract class Actor(
     protected abstract suspend fun onRemovingChild(child: Actor)
 
     open suspend fun addChild(child: Actor) {
-        if (child.parent != null) error("错误操作，不允许加入")
-        if (child.isStartDestroy) error("销毁状态，不允许加入")
-        if (this.isStartDestroy) error("销毁状态，不允许加入")
+        if (child.parent != null) serverError("错误操作，不允许加入")
+        if (child.isStartDestroy) serverError("销毁状态，不允许加入")
+        if (this.isStartDestroy) serverError("销毁状态，不允许加入")
         children[child.name] = child
         child.parent = this
         child.onAdded(this)

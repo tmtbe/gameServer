@@ -7,6 +7,7 @@ import com.tmtbe.frame.gameserver.base.actor.PlayerActor
 import com.tmtbe.frame.gameserver.base.actor.RoomActor
 import com.tmtbe.frame.gameserver.base.mqtt.MqttGateWay
 import com.tmtbe.frame.gameserver.base.mqtt.MqttMessage
+import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
 import com.tmtbe.frame.gameserver.base.utils.log
 import kotlinx.coroutines.GlobalScope
@@ -37,10 +38,20 @@ class ResourceManager(sceneList: List<Scene>) {
     private val sceneMap: ConcurrentHashMap<String, Scene> = ConcurrentHashMap()
 
     companion object {
+        //有哪些服务器存在
         const val GAME_SERVER_ = "GAME_SERVER_"
+
+        //room在哪个服务器
         const val ROOM_ON_GAME_SERVER = "ROOM_ON_GAME_SERVER"
-        const val ROOM_ON_SCENE_ = "ROOM_ON_SCENE_"
-        const val PLAYER_ON_SERVER_ROOM = "PLAYER_ON_SERVER_ROOM"
+
+        //场景里有多少room
+        const val SCENE_HAS_ROOM_ = "SCENE_HAS_ROOM_"
+
+        //玩家在哪个room
+        const val PLAYER_ON_SERVER_SCENE_ROOM = "PLAYER_ON_SERVER_SCENE_ROOM"
+
+        //room里有多少玩家的订阅信息
+        const val SCENE_ROOM_HAS_PLAYER_SUB_ = "SCENE_ROOM_HAS_PLAYER_SUB_"
     }
 
     init {
@@ -79,7 +90,7 @@ class ResourceManager(sceneList: List<Scene>) {
     fun getAllSceneName() = sceneMap.keys().toList()
 
     fun addActor(actor: Actor) {
-        if (actorMap.contains(actor.name)) error("重复名称的Actor：${actor.name}")
+        if (actorMap.contains(actor.name)) serverError("重复名称的Actor：${actor.name}")
         actorMap[actor.name] = actor
     }
 
@@ -92,8 +103,8 @@ class ResourceManager(sceneList: List<Scene>) {
     suspend fun removeActor(name: String) {
         val actor = actorMap[name]
         if (actor != null) {
-            actorMap.remove(actor.name)
             actor.scene.removeActor(actor.name)
+            actorMap.remove(actor.name)
             actor.destroy()
         }
     }
