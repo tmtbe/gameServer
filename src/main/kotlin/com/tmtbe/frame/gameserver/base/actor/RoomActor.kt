@@ -5,8 +5,6 @@ import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
 import com.tmtbe.frame.gameserver.base.mqtt.getMqttMsgType
 import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.scene.Scene
-import com.tmtbe.frame.gameserver.base.service.RoomService
-import com.tmtbe.frame.gameserver.base.utils.SpringUtils
 import java.time.Duration
 import java.util.UUID
 
@@ -49,7 +47,7 @@ abstract class RoomActor(
         if (playerActor != null) {
             val mqttMessage = MqttMessage(UUID.randomUUID().toString(),
                     body.getMqttMsgType(), body,
-                    TopicTemplate.TopicParse(TopicTemplate.ResponseChannel(playerActor.playerName),
+                    TopicTemplate.TopicParse(TopicTemplate.ServerChannel(playerActor.playerName),
                             sceneName, resourceManager.serverName)
             )
             sendMqttMessage(mqttMessage)
@@ -57,7 +55,7 @@ abstract class RoomActor(
     }
 
     protected abstract suspend fun onAddedPlayer(playerActor: PlayerActor)
-    protected abstract suspend fun onRemovingPlayer(playerActor: PlayerActor)
+    protected abstract suspend fun onRemovedPlayer(playerActor: PlayerActor)
 
     protected override suspend fun onAddedChild(child: Actor) {
         if (child is PlayerActor) {
@@ -65,16 +63,16 @@ abstract class RoomActor(
         }
     }
 
-    protected override suspend fun onRemovingChild(child: Actor) {
+    protected override suspend fun onRemovedChild(child: Actor) {
         if (child is PlayerActor) {
-            onRemovingPlayer(child)
+            onRemovedPlayer(child)
         }
-        if (getPlayerActorList().size == 1) {
+        if (getPlayerActorList().isEmpty()) {
             destroy()
         }
     }
 
-    protected override suspend fun onRemoving(parent: Actor) {
+    protected override suspend fun onRemoved(parent: Actor) {
 
     }
 

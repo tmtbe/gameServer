@@ -3,7 +3,6 @@ package com.tmtbe.frame.gameserver.base.mqtt
 import com.alibaba.fastjson.JSONObject
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -25,7 +24,6 @@ data class MqttMessage<T>(
 abstract class MqttMessageBinding<T> {
     private val mqttIndex: Int = 0
 
-    @InternalCoroutinesApi
     @Autowired
     protected lateinit var resourceManager: ResourceManager
 
@@ -35,7 +33,6 @@ abstract class MqttMessageBinding<T> {
     abstract fun getClassName(): Class<T>
     abstract suspend fun handleMessage(mqttMessage: MqttMessage<T>)
 
-    @InternalCoroutinesApi
     fun buildMessage(topic: TopicTemplate.TopicParse, payload: JSONObject) {
         val type = payload.getString("type")
         val body = payload.getJSONObject("body")?.toJavaObject(getClassName())
@@ -51,12 +48,11 @@ abstract class MqttMessageBinding<T> {
         }
     }
 
-    @InternalCoroutinesApi
     fun responseMessage(fromMqttMessage: MqttMessage<*>, responseBody: Any) {
         val topicChannel = fromMqttMessage.topicParse.topicChannel
-        if (topicChannel is TopicTemplate.RequestChannel) {
+        if (topicChannel is TopicTemplate.ClientChannel) {
             val createTopic = TopicTemplate.TopicParse(
-                    TopicTemplate.ResponseChannel(topicChannel.getName()),
+                    TopicTemplate.ServerChannel(topicChannel.getName()),
                     fromMqttMessage.topicParse.scene,
                     resourceManager.serverName)
             resourceManager.sendMqttMessage(
@@ -64,13 +60,11 @@ abstract class MqttMessageBinding<T> {
         }
     }
 
-    @InternalCoroutinesApi
     fun responseError(fromMqttMessage: MqttMessage<*>, e: Throwable) {
         val errorMessageBody = ErrorMessage(e.message)
         responseMessage(fromMqttMessage, errorMessageBody)
     }
 
-    @InternalCoroutinesApi
     fun responseError(fromMqttMessage: MqttMessage<*>, errorMessage: String, body: Any) {
         val errorMessageBody = ErrorMessage(errorMessage, body)
         responseMessage(fromMqttMessage, errorMessageBody)
@@ -79,6 +73,18 @@ abstract class MqttMessageBinding<T> {
 
     fun mustNotNull(any: Any?) {
         if (any == null) throw ErrorMessageException("协议错误缺少信息")
+    }
+
+    /**
+     * 转发消息给Actor
+     */
+    fun forwardToPlayerActor(fromMqttMessage: MqttMessage<*>) {
+        val topicChannel = fromMqttMessage.topicParse.topicChannel as TopicTemplate.ClientChannel
+        val playerName = topicChannel.getName()
+        val sceneName = fromMqttMessage.topicParse.scene
+        val scene = resourceManager.getScene(sceneName) ?: serverError("没有该场景：${sceneName}")
+        val playerActor = scene.getPlayerActor(playerName) ?: serverError("没有该Actor：${playerName}")
+        resourceManager.forwardMqttMsgToActor(playerActor, fromMqttMessage)
     }
 }
 

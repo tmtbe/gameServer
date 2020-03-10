@@ -25,6 +25,7 @@ abstract class Scene(
 
     fun getAllRoomActor() = roomActors.values.toList()
     fun getAllPlayerActor() = playerActors.values.toList()
+    fun getPlayerActor(playerName: String) = playerActors[playerName]
     fun getRoomActor(roomName: String) = roomActors[roomName]
     suspend fun createRoom(roomName: String): RoomActor {
         matchName(roomName)

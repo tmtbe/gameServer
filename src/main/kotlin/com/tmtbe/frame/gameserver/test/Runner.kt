@@ -4,13 +4,11 @@ import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.service.EMQAcl
 import com.tmtbe.frame.gameserver.base.service.EMQService
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 
-
-@InternalCoroutinesApi
 @Component
 class Runner(val resourceManager: ResourceManager, val emqService: EMQService) : CommandLineRunner {
     override fun run(vararg args: String?) {
@@ -20,6 +18,15 @@ class Runner(val resourceManager: ResourceManager, val emqService: EMQService) :
                 emqService.addUser(username, username)
                 emqService.addAcl(username, "REQUEST/${username}/+/+", EMQAcl.PUBLISH)
                 emqService.subscribe(username, "RESPONSE/${username}/+/+")
+            }
+            val scene = resourceManager.getScene("test")!!
+            for (i in 1..2000) {
+                scene.createRoom("room$i")
+                for (j in 1..4) {
+                    scene.createPlayer("room$i", "room$i-player$j")
+                    delay(1)
+                }
+                delay(10)
             }
         }
     }

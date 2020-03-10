@@ -11,7 +11,6 @@ import com.tmtbe.frame.gameserver.base.mqtt.sub.SubscribeTopic
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.utils.log
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -40,7 +39,6 @@ class MqttConfig {
 
     private var log = this.log()
 
-    @InternalCoroutinesApi
     @Bean
     fun mqtt3Client(
             subscribeTopicList: List<SubscribeTopic>,

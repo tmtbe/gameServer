@@ -16,27 +16,27 @@ suspend fun <T> Channel<T>.receiveTimeOut(
         everySecondHandle: ((time: Long) -> Unit)? = null
 ): T {
     val source = this
-    val default = Channel<String>()
+    val timeOutChannel = Channel<String>()
     var nowTime = 0L
     GlobalScope.launch(coroutineContext) {
         while (nowTime < time) {
             delay(java.lang.Long.min(time, 1000))
             nowTime += java.lang.Long.min(time, 1000)
-            if (default.isClosedForSend) break
+            if (timeOutChannel.isClosedForSend) break
             if (everySecondHandle != null) everySecondHandle(nowTime)
         }
-        default.send("ok")
+        timeOutChannel.send("ok")
     }
     return select {
         source.onReceive {
             if (autoClose) source.close()
-            default.close()
+            timeOutChannel.close()
             it
         }
-        default.onReceive {
+        timeOutChannel.onReceive {
             if (autoClose) source.close()
             if (onTimeOut != null) onTimeOut()
-            default.close()
+            timeOutChannel.close()
             default()
         }
     }

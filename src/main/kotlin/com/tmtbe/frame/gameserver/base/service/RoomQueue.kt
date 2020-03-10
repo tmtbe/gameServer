@@ -8,7 +8,6 @@ import com.tmtbe.frame.gameserver.base.utils.RedisUtils
 import com.tmtbe.frame.gameserver.base.utils.toJson
 import com.tmtbe.frame.gameserver.base.utils.toJsonObject
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.MessageProperties
@@ -27,7 +26,6 @@ class RoomQueue(
         val redisUtils: RedisUtils,
         val emqService: EMQService
 ) {
-    @InternalCoroutinesApi
     @RabbitListener(bindings = [
         QueueBinding(
                 value = Queue("room"),

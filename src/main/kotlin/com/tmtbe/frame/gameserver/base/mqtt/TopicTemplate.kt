@@ -20,10 +20,10 @@ class TopicTemplate {
             val (topicChannelType, topicChannelName, scene, server) = split
             return when (TopicChannelType.valueOf(topicChannelType)) {
                 TopicChannelType.REQUEST -> {
-                    TopicParse(RequestChannel(topicChannelName), scene, server)
+                    TopicParse(ClientChannel(topicChannelName), scene, server)
                 }
                 TopicChannelType.RESPONSE -> {
-                    TopicParse(ResponseChannel(topicChannelName), scene, server)
+                    TopicParse(ServerChannel(topicChannelName), scene, server)
                 }
                 TopicChannelType.ROOM -> {
                     TopicParse(RoomChannel(topicChannelName), scene, server)
@@ -42,21 +42,29 @@ class TopicTemplate {
         }
     }
 
-
-    class RequestChannel(
+    /**
+     * 客户端发送给服务器的
+     */
+    class ClientChannel(
             private val userName: String
     ) : TopicChannel {
         override fun getType() = TopicChannelType.REQUEST
         override fun getName() = userName
     }
 
-    class ResponseChannel(
+    /**
+     * 服务器发送给用户的
+     */
+    class ServerChannel(
             private val userName: String
     ) : TopicChannel {
         override fun getType() = TopicChannelType.RESPONSE
         override fun getName() = userName
     }
 
+    /**
+     * 服务器发送给房间的
+     */
     class RoomChannel(
             private val roomName: String
     ) : TopicChannel {

@@ -2,11 +2,9 @@ package com.tmtbe.frame.gameserver.test
 
 import com.tmtbe.frame.gameserver.base.actor.*
 import com.tmtbe.frame.gameserver.base.scene.Scene
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 import java.time.Duration
 
-@InternalCoroutinesApi
 class TestPlayerActor(name: String,
                       scene: Scene
 ) : PlayerActor(name, scene) {
@@ -68,7 +66,7 @@ class TestPlayerActor(name: String,
         }
     }
 
-    override suspend fun onRemoving(parent: Actor) {
+    override suspend fun onRemoved(parent: Actor) {
 
     }
 

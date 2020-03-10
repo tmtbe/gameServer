@@ -40,7 +40,7 @@ abstract class PlayerActor(
 
     }
 
-    protected override suspend fun onRemovingChild(child: Actor) {
+    protected override suspend fun onRemovedChild(child: Actor) {
 
     }
 

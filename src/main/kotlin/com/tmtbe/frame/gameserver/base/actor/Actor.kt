@@ -42,6 +42,8 @@ abstract class Actor(
                     onReceive(msg)
                 }
             }
+            // 由于是父类的init先执行，协程运行时机不确定，有可能会出现空指针现象，所以这里需要delay一下再执行onStart
+            delay(10)
             onStart(isActive)
         }
     }
@@ -112,13 +114,13 @@ abstract class Actor(
 
     protected abstract suspend fun handleMqttMsg(msg: MqttMsg)
 
-    protected abstract suspend fun onRemoving(parent: Actor)
+    protected abstract suspend fun onRemoved(parent: Actor)
 
     protected abstract suspend fun onAdded(parent: Actor)
 
     protected abstract suspend fun onAddedChild(child: Actor)
 
-    protected abstract suspend fun onRemovingChild(child: Actor)
+    protected abstract suspend fun onRemovedChild(child: Actor)
 
     open suspend fun addChild(child: Actor) {
         if (child.parent != null) serverError("child有parent，不允许加入")
@@ -131,8 +133,8 @@ abstract class Actor(
         child.addHookOnDestroy {
             log.info("remove child: ${it.name}")
             this@Actor.children.remove(it.name)
-            this@Actor.onRemovingChild(it)
-            it.onRemoving(this@Actor)
+            this@Actor.onRemovedChild(it)
+            it.onRemoved(this@Actor)
         }
     }
 

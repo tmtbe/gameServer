@@ -8,23 +8,22 @@ import java.time.Duration
 class TestRoomActor(name: String,
                     scene: Scene
 ) : RoomActor(name, scene) {
-    private val needPlayerCount = 8
     private var status = ""
     private var maxCount = (20..30).random()
     private var nowCount = 0
     override fun provideRoomConfiguration(): RoomConfiguration {
-        return RoomConfiguration(4, Duration.ofSeconds(5))
+        return RoomConfiguration(4, Duration.ofSeconds(20))
     }
 
     override suspend fun onAddedPlayer(playerActor: PlayerActor) {
         sendMqttToRoom("$name: ${playerActor.name}加入了房间")
-        if (getPlayerActorList().size == needPlayerCount) {
+        if (getPlayerActorList().size == provideRoomConfiguration().maxPlayerNumber) {
             status = "START"
             sendMqttToRoom("$name: 开始")
         }
     }
 
-    override suspend fun onRemovingPlayer(playerActor: PlayerActor) {
+    override suspend fun onRemovedPlayer(playerActor: PlayerActor) {
         sendMqttToRoom("$name: ${playerActor.name}离开了房间")
     }
 

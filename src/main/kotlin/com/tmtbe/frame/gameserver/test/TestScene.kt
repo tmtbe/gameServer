@@ -2,11 +2,8 @@ package com.tmtbe.frame.gameserver.test
 
 import com.tmtbe.frame.gameserver.base.actor.RoomActor
 import com.tmtbe.frame.gameserver.base.scene.Scene
-import com.tmtbe.frame.gameserver.base.utils.log
-import kotlinx.coroutines.InternalCoroutinesApi
 import org.springframework.stereotype.Component
 
-@InternalCoroutinesApi
 @Component
 class TestScene : Scene(
         "test",

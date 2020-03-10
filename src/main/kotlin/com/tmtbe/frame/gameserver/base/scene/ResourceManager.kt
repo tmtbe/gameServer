@@ -102,6 +102,10 @@ class ResourceManager(sceneList: List<Scene>) {
         actorMap[name]?.send(MqttMsg(mqttMessage))
     }
 
+    fun forwardMqttMsgToActor(actor: Actor, mqttMessage: MqttMessage<*>) {
+        actor.send(MqttMsg(mqttMessage))
+    }
+
     suspend fun removeActor(name: String) {
         actorMap[name]?.destroy()
     }
