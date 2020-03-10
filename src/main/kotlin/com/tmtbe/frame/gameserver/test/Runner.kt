@@ -20,7 +20,7 @@ class Runner(val resourceManager: ResourceManager, val emqService: EMQService) :
                 emqService.subscribe(username, "RESPONSE/${username}/+/+")
             }
             val scene = resourceManager.getScene("test")!!
-            for (i in 1..2000) {
+            for (i in 1..20000) {
                 scene.createRoom("room$i")
                 for (j in 1..4) {
                     scene.createPlayer("room$i", "room$i-player$j")
