@@ -1,8 +1,8 @@
 package com.tmtbe.frame.gameserver.base.mqtt.sub
 
-import com.alibaba.fastjson.JSON
 import com.tmtbe.frame.gameserver.base.mqtt.sub.SubscribeTopic.MqttSubscribeMessage
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
+import com.tmtbe.frame.gameserver.base.utils.toJsonObject
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.springframework.stereotype.Component
 
@@ -16,7 +16,7 @@ class SystemClientDisconnectedSub(val resourceManager: ResourceManager) : Subscr
     override fun interrupt(): Boolean = true
 
     override suspend fun handle(mqttSubscribeMessage: MqttSubscribeMessage) {
-        val clientDisConnectedMsg = JSON.parseObject(mqttSubscribeMessage.payload, ClientDisconnectedMsg::class.java)
+        val clientDisConnectedMsg = mqttSubscribeMessage.payload.toJsonObject(ClientDisconnectedMsg::class.java)
         resourceManager.onPlayerDisconnected(clientDisConnectedMsg.username)
     }
 

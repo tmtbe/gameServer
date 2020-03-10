@@ -1,5 +1,6 @@
 package com.tmtbe.frame.gameserver.base.utils
 
+import com.alibaba.fastjson.JSON
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -40,3 +41,6 @@ suspend fun <T> Channel<T>.receiveTimeOut(
         }
     }
 }
+
+fun Any.toJson(): String = JSON.toJSONString(this)
+fun <T> String.toJsonObject(clazz: Class<T>) = JSON.parseObject(this, clazz)

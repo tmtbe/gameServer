@@ -1,11 +1,12 @@
 package com.tmtbe.frame.gameserver.base.service
 
-import com.alibaba.fastjson.JSON
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.PLAYER_ON_SERVER_SCENE_ROOM
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.ROOM_ON_GAME_SERVER
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.SCENE_HAS_ROOM_
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.SCENE_ROOM_HAS_PLAYER_SUB_
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
+import com.tmtbe.frame.gameserver.base.utils.toJson
+import com.tmtbe.frame.gameserver.base.utils.toJsonObject
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -71,6 +72,3 @@ class RoomQueue(
             val roomName: String
     )
 }
-
-fun Any.toJson(): String = JSON.toJSONString(this)
-fun <T> String.toJsonObject(clazz: Class<T>) = JSON.parseObject(this, clazz)

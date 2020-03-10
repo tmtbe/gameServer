@@ -1,6 +1,5 @@
 package com.tmtbe.frame.gameserver.base.scene
 
-import com.alibaba.fastjson.JSON
 import com.tmtbe.frame.gameserver.base.actor.Actor
 import com.tmtbe.frame.gameserver.base.actor.MqttMsg
 import com.tmtbe.frame.gameserver.base.actor.PlayerActor
@@ -10,6 +9,7 @@ import com.tmtbe.frame.gameserver.base.mqtt.MqttMessage
 import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
 import com.tmtbe.frame.gameserver.base.utils.log
+import com.tmtbe.frame.gameserver.base.utils.toJson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
@@ -146,6 +146,6 @@ class ResourceManager(sceneList: List<Scene>) {
 
     fun sendMqttMessage(mqttMessage: MqttMessage<*>) {
         val topicParse = mqttMessage.topicParse
-        getMqttGatWay().sendToMqtt(JSON.toJSONString(mqttMessage.getSendMap()), topicParse.toTopicString())
+        getMqttGatWay().sendToMqtt(mqttMessage.getSendMap().toJson(), topicParse.toTopicString())
     }
 }

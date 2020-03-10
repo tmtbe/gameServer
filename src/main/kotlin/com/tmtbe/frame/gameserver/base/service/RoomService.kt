@@ -1,6 +1,5 @@
 package com.tmtbe.frame.gameserver.base.service
 
-import com.alibaba.fastjson.JSON
 import com.tmtbe.frame.gameserver.base.actor.RoomActor
 import com.tmtbe.frame.gameserver.base.mqtt.TopicTemplate
 import com.tmtbe.frame.gameserver.base.mqtt.serverError
@@ -11,6 +10,8 @@ import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.SCENE_HAS
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.SCENE_ROOM_HAS_PLAYER_SUB_
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
 import com.tmtbe.frame.gameserver.base.utils.log
+import com.tmtbe.frame.gameserver.base.utils.toJson
+import com.tmtbe.frame.gameserver.base.utils.toJsonObject
 import org.springframework.stereotype.Service
 
 @Service
@@ -38,7 +39,7 @@ class RoomService(
     suspend fun getPlayerRoom(playerName: String): PlayerServerRoom? {
         val hGet = redisUtils.hGet(PLAYER_ON_SERVER_SCENE_ROOM, playerName)
         if (hGet != null) {
-            val playerServerRoom = JSON.parseObject(hGet, PlayerServerRoom::class.java)
+            val playerServerRoom = hGet.toJsonObject(PlayerServerRoom::class.java)
             if (playerServerRoom.serverName == resourceManager.serverName) {
                 val scene = resourceManager.getScene(playerServerRoom.sceneName)
                 val hasRoom = scene?.hasRoom(playerServerRoom.roomName)
@@ -76,7 +77,7 @@ class RoomService(
         )
         emqService.subscribe(playerName, createTopic)
         redisUtils.hSet(PLAYER_ON_SERVER_SCENE_ROOM, playerName,
-                JSON.toJSONString(PlayerServerRoom(playerName, resourceManager.serverName, sceneName, roomName)))
+                PlayerServerRoom(playerName, resourceManager.serverName, sceneName, roomName).toJson())
         redisUtils.sSet("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName",
                 PlayerRoomTopic(playerName, createTopic).toJson())
         playerActor.addHookOnDestroy {
