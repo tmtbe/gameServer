@@ -6,22 +6,22 @@ import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import com.tmtbe.frame.gameserver.base.utils.SpringUtils
+import com.tmtbe.frame.gameserver.base.utils.log
+import com.tmtbe.frame.gameserver.base.utils.receiveTimeOut
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.selects.select
-import java.lang.Long.min
 import java.time.Duration
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.coroutineContext
 
-@InternalCoroutinesApi
 abstract class Actor(
         var name: String,
         val scene: Scene
 ) {
+    protected val log = log()
     protected var resourceManager: ResourceManager = SpringUtils.getBean(ResourceManager::class.java)
     protected var topicTemplate: TopicTemplate = SpringUtils.getBean(TopicTemplate::class.java)
     private var requestMsgList: LinkedList<RequestMsg<Any, Any>> = LinkedList()
@@ -29,6 +29,7 @@ abstract class Actor(
     val children: ConcurrentHashMap<String, Actor> = ConcurrentHashMap()
     private lateinit var sendChannel: SendChannel<ActorMsg>
     private val startTime: Long = System.currentTimeMillis()
+    private val onDestroyHook: ArrayList<(suspend (Actor) -> Unit)> = ArrayList()
 
     @Volatile
     private var isStartDestroy: Boolean = false
@@ -43,6 +44,13 @@ abstract class Actor(
             }
             onStart(isActive)
         }
+    }
+
+    /**
+     * 添加销毁的回调
+     */
+    fun addHookOnDestroy(hook: suspend (Actor) -> Unit) {
+        onDestroyHook.add(hook)
     }
 
     protected abstract fun getMaxKeepAliveTime(): Duration
@@ -113,26 +121,27 @@ abstract class Actor(
     protected abstract suspend fun onRemovingChild(child: Actor)
 
     open suspend fun addChild(child: Actor) {
-        if (child.parent != null) serverError("错误操作，不允许加入")
-        if (child.isStartDestroy) serverError("销毁状态，不允许加入")
-        if (this.isStartDestroy) serverError("销毁状态，不允许加入")
+        if (child.parent != null) serverError("child有parent，不允许加入")
+        if (child.isStartDestroy) serverError("child处于销毁状态，不允许加入")
+        if (this.isStartDestroy) serverError("自身处于销毁状态，不允许加入")
         children[child.name] = child
         child.parent = this
         child.onAdded(this)
         this.onAddedChild(child)
+        child.addHookOnDestroy {
+            log.info("remove child: ${it.name}")
+            this@Actor.children.remove(it.name)
+            this@Actor.onRemovingChild(it)
+            it.onRemoving(this@Actor)
+        }
     }
 
     suspend fun removeChild(child: Actor) {
-        children.remove(child.name)
         child.destroy()
     }
 
     suspend fun removeChild(name: String) {
-        val actor = children[name]
-        if (actor != null) {
-            children.remove(name)
-            actor.destroy()
-        }
+        children[name]?.destroy()
     }
 
     fun send(actorMsg: ActorMsg) {
@@ -143,22 +152,19 @@ abstract class Actor(
 
     open suspend fun destroy() {
         if (isStartDestroy) return
-        job?.cancel()
         isStartDestroy = true
-        onRemoving(this)
-        if (this.parent != null) {
-            this.parent!!.onRemovingChild(this)
-            this.parent!!.removeChild(this)
-            this.parent = null
-        }
-        resourceManager.removeActor(this)
         val keys = children.keys.toList()
         for (element in keys) {
             val child = children[element]
-            child?.parent?.removeChild(child)
             child?.destroy()
         }
         children.clear()
+        job?.cancel()
+        onDestroyHook.forEach {
+            it(this@Actor)
+        }
+        onDestroyHook.clear()
+        this.parent = null
         this.requestMsgList.forEach {
             it.destroy()
         }
@@ -201,7 +207,6 @@ class RequestMsg<T, E>(val request: E) : ActorMsg() {
         everySecondHandles.clear()
     }
 
-    @InternalCoroutinesApi
     suspend fun timeOut(
             time: Long,
             default: () -> T
@@ -233,37 +238,3 @@ class RequestMsg<T, E>(val request: E) : ActorMsg() {
     }
 }
 
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
-suspend fun <T> Channel<T>.receiveTimeOut(
-        time: Long,
-        autoClose: Boolean,
-        default: () -> T,
-        onTimeOut: (() -> Unit)? = null,
-        everySecondHandle: ((time: Long) -> Unit)? = null
-): T {
-    val source = this
-    val defalut = Channel<T>()
-    var nowTime = 0L
-    GlobalScope.launch(coroutineContext) {
-        while (nowTime < time) {
-            delay(min(time, 1000))
-            nowTime += min(time, 1000)
-            if (defalut.isClosedForSend) break
-            if (everySecondHandle != null) everySecondHandle(nowTime)
-        }
-        defalut.close()
-    }
-    return select {
-        source.onReceive {
-            if (autoClose) source.close()
-            defalut.close()
-            it
-        }
-        defalut.onReceiveOrClosed {
-            if (autoClose) source.close()
-            if (onTimeOut != null) onTimeOut()
-            default()
-        }
-    }
-}

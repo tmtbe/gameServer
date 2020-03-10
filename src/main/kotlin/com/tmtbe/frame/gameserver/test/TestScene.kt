@@ -13,7 +13,6 @@ class TestScene : Scene(
         TestRoomActor::class.java,
         TestPlayerActor::class.java
 ) {
-    val log = log()
     override suspend fun onRoomCreate(roomActor: RoomActor) {
         log.info("${roomActor.name}:创建了")
     }

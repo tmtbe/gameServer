@@ -3,9 +3,7 @@ package com.tmtbe.frame.gameserver.base.actor
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import com.tmtbe.frame.gameserver.base.service.RoomService
 import com.tmtbe.frame.gameserver.base.utils.SpringUtils
-import kotlinx.coroutines.InternalCoroutinesApi
 
-@InternalCoroutinesApi
 abstract class PlayerActor(
         name: String,
         scene: Scene
@@ -31,7 +29,7 @@ abstract class PlayerActor(
     }
 
     fun sendMqttToPlayer(body: Any) {
-        getRoomActor().sendMqttToPlayer(playerName, body)
+        getRoomActor().sendMqttToPlayer(name, body)
     }
 
     fun sendMqttToRoom(body: Any) {

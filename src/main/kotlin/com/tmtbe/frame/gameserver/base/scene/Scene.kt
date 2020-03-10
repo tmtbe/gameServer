@@ -3,21 +3,17 @@ package com.tmtbe.frame.gameserver.base.scene
 import com.tmtbe.frame.gameserver.base.actor.PlayerActor
 import com.tmtbe.frame.gameserver.base.actor.RoomActor
 import com.tmtbe.frame.gameserver.base.mqtt.serverError
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.launch
+import com.tmtbe.frame.gameserver.base.utils.log
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import kotlin.coroutines.coroutineContext
 
-@InternalCoroutinesApi
 abstract class Scene(
         val name: String,
         private val roomActor: Class<*>,
         private val playerActor: Class<*>
 ) {
-
+    protected val log = log()
     var resourceManager: ResourceManager? = null
 
     private val roomActors: ConcurrentHashMap<String, RoomActor> = ConcurrentHashMap()
@@ -27,18 +23,27 @@ abstract class Scene(
         matchName(name)
     }
 
-    fun getAllRoomActorName() = roomActors.keys.toList()
-    fun getAllPlayerActorName() = resourceManager!!.getAllPlayerActorName().filter { it.startsWith("$name/") }
+    fun getAllRoomActor() = roomActors.values.toList()
+    fun getAllPlayerActor() = playerActors.values.toList()
     fun getRoomActor(roomName: String) = roomActors[roomName]
     suspend fun createRoom(roomName: String): RoomActor {
         matchName(roomName)
         val newRoomName = "$name/$roomName"
         val roomActor = roomActor.getConstructor(String::class.java, Scene::class.java)
                 .newInstance(newRoomName, this) as RoomActor
-        resourceManager!!.addActor(roomActor)
-        roomActors[newRoomName] = roomActor
-        onRoomCreate(roomActor)
+        addRoomActor(roomActor)
         return roomActor
+    }
+
+    private suspend fun addRoomActor(roomActor: RoomActor) {
+        onRoomCreate(roomActor)
+        resourceManager!!.addActor(roomActor)
+        roomActors[roomActor.roomName] = roomActor
+        roomActor.addHookOnDestroy {
+            onRoomDestroy(it as RoomActor)
+            roomActors.remove(it.roomName)
+            log.info("remove room ${it.roomName}")
+        }
     }
 
     suspend fun createPlayer(roomName: String, playerName: String): PlayerActor {
@@ -51,24 +56,17 @@ abstract class Scene(
         if ((roomActor as RoomActor).isFull()) serverError("房间已满人")
         val playerActor = playerActor.getConstructor(String::class.java, Scene::class.java)
                 .newInstance(newPlayerName, this) as PlayerActor
-        playerActors[playerName] = playerActor
-        resourceManager!!.addActor(playerActor)
+        addPlayerActor(playerActor)
         roomActor.addChild(playerActor)
         return playerActor
     }
 
-    suspend fun removeActor(name: String) {
-        val actor = resourceManager!!.getActor(name)
-        when (actor) {
-            is RoomActor -> roomActors.remove(name)
-            is PlayerActor -> playerActors.remove(actor.playerName)
-        }
-        if (actor != null) {
-            //异步调用，不然相互调用死循环了
-            GlobalScope.launch(coroutineContext) {
-                resourceManager!!.removeActor(actor.name)
-            }
-            actor.destroy()
+    private fun addPlayerActor(playerActor: PlayerActor) {
+        resourceManager!!.addActor(playerActor)
+        playerActors[playerActor.playerName] = playerActor
+        playerActor.addHookOnDestroy {
+            log.info("remove player: ${(it as PlayerActor).playerName}")
+            playerActors.remove(it.playerName)
         }
     }
 

@@ -99,7 +99,6 @@ class MqttConfig {
 }
 
 
-@InternalCoroutinesApi
 @Component
 class MqttPublic(val mqtt3BlockingClient: Mqtt3BlockingClient, resourceManager: ResourceManager) : MqttGateWay(resourceManager) {
     override fun sendToMqtt(data: String, topic: String, qos: MqttQos) {
@@ -107,7 +106,6 @@ class MqttPublic(val mqtt3BlockingClient: Mqtt3BlockingClient, resourceManager: 
     }
 }
 
-@InternalCoroutinesApi
 abstract class MqttGateWay(val resourceManager: ResourceManager) {
     @PostConstruct
     fun registerMqttGateWay() {

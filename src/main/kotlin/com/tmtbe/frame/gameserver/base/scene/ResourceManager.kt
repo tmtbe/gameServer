@@ -11,7 +11,6 @@ import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
 import com.tmtbe.frame.gameserver.base.utils.log
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -23,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.PostConstruct
 
 @Component
-@InternalCoroutinesApi
 @EnableScheduling
 class ResourceManager(sceneList: List<Scene>) {
     @Value("\${spring.application.name}")
@@ -92,6 +90,10 @@ class ResourceManager(sceneList: List<Scene>) {
     fun addActor(actor: Actor) {
         if (actorMap.contains(actor.name)) serverError("重复名称的Actor：${actor.name}")
         actorMap[actor.name] = actor
+        actor.addHookOnDestroy {
+            log.info("remove resource: ${it.name}")
+            actorMap.remove(it.name)
+        }
     }
 
     fun getActor(name: String) = actorMap[name]
@@ -101,16 +103,11 @@ class ResourceManager(sceneList: List<Scene>) {
     }
 
     suspend fun removeActor(name: String) {
-        val actor = actorMap[name]
-        if (actor != null) {
-            actor.scene.removeActor(actor.name)
-            actorMap.remove(actor.name)
-            actor.destroy()
-        }
+        actorMap[name]?.destroy()
     }
 
     suspend fun removeActor(actor: Actor) {
-        removeActor(actor.name)
+        actorMap[actor.name]?.destroy()
     }
 
     suspend fun removeAllActor() {

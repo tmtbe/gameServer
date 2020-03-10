@@ -10,11 +10,10 @@ import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.ROOM_ON_G
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.SCENE_HAS_ROOM_
 import com.tmtbe.frame.gameserver.base.scene.ResourceManager.Companion.SCENE_ROOM_HAS_PLAYER_SUB_
 import com.tmtbe.frame.gameserver.base.utils.RedisUtils
-import kotlinx.coroutines.InternalCoroutinesApi
+import com.tmtbe.frame.gameserver.base.utils.log
 import org.springframework.stereotype.Service
 
 @Service
-@InternalCoroutinesApi
 class RoomService(
         val resourceManager: ResourceManager,
         val redisUtils: RedisUtils,
@@ -22,6 +21,8 @@ class RoomService(
         val topicTemplate: TopicTemplate,
         val roomQueue: RoomQueue
 ) {
+    protected val log = log()
+
     data class PlayerServerRoom(
             val playerName: String,
             val serverName: String,
@@ -65,10 +66,10 @@ class RoomService(
 
     suspend fun playerInterRoom(playerName: String, sceneName: String, roomName: String) {
         val scene = resourceManager.getScene(sceneName)!!
-        val roomActor = scene.getRoomActor("$sceneName/$roomName") ?: serverError("room 不存在")
-        val playerActor = roomActor.getPlayerActor("$sceneName/$roomName/$playerName")
+        val roomActor = scene.getRoomActor(roomName) ?: serverError("room 不存在")
+        var playerActor = roomActor.getPlayerActor("$sceneName/$roomName/$playerName")
         if (playerActor == null) {
-            scene.createPlayer(roomName, playerName)
+            playerActor = scene.createPlayer(roomName, playerName)
         }
         val createTopic = topicTemplate.createTopic(
                 TopicTemplate.RoomChannel(roomName), sceneName, resourceManager.serverName
@@ -78,32 +79,22 @@ class RoomService(
                 JSON.toJSONString(PlayerServerRoom(playerName, resourceManager.serverName, sceneName, roomName)))
         redisUtils.sSet("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName",
                 PlayerRoomTopic(playerName, createTopic).toJson())
+        playerActor.addHookOnDestroy {
+            log.info("remove player sub/redis info:$playerName")
+            emqService.unsubscribe(playerName, createTopic)
+            redisUtils.hDel(PLAYER_ON_SERVER_SCENE_ROOM, playerName)
+            redisUtils.sDel("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName",
+                    PlayerRoomTopic(playerName, createTopic).toJson())
+        }
     }
 
-    /**
-     * 清理用户就行
-     */
     suspend fun playerOuterRoom(playerName: String, sceneName: String, roomName: String) {
-        resourceManager.getActor("$sceneName/$roomName/$playerName")?.destroy()
-        val createTopic = topicTemplate.createTopic(
-                TopicTemplate.RoomChannel(roomName), sceneName, resourceManager.serverName
-        )
-        emqService.unsubscribe(playerName, createTopic)
-        redisUtils.hDel(PLAYER_ON_SERVER_SCENE_ROOM, playerName)
-        redisUtils.sDel("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName",
-                PlayerRoomTopic(playerName, createTopic).toJson())
+        val actor = resourceManager.getActor("$sceneName/$roomName/$playerName") ?: serverError("用户不在这个房间")
+        actor.destroy()
     }
 
-    /**
-     * 清理房间就行
-     */
     suspend fun closeRoom(roomActor: RoomActor) {
-        val roomName = roomActor.roomName
-        val sceneName = roomActor.sceneName
         roomActor.destroy()
-        redisUtils.sDel("$SCENE_HAS_ROOM_$sceneName", roomActor.roomName)
-        redisUtils.hDel(ROOM_ON_GAME_SERVER, "$sceneName/$roomName")
-        redisUtils.del("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName")
     }
 
     suspend fun createRoom(sceneName: String, roomName: String) {
@@ -113,6 +104,13 @@ class RoomService(
         redisUtils.sSet("$SCENE_HAS_ROOM_$sceneName", roomName)
         redisUtils.hSet(ROOM_ON_GAME_SERVER, "$sceneName/$roomName", resourceManager.serverName)
         roomQueue.sendRoomInfo(RoomQueue.RoomInfo(sceneName, roomName), createRoom.provideRoomConfiguration().maxKeepAliveTime)
+        createRoom.addHookOnDestroy {
+            val roomActor = it as RoomActor
+            log.info("remove room redis info:${roomActor.roomName}")
+            redisUtils.sDel("$SCENE_HAS_ROOM_$sceneName", roomActor.roomName)
+            redisUtils.hDel(ROOM_ON_GAME_SERVER, "$sceneName/$roomName")
+            redisUtils.del("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName")
+        }
     }
 
     suspend fun hasRoom(sceneName: String, roomName: String): Boolean {

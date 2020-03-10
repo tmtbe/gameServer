@@ -7,15 +7,9 @@ import com.tmtbe.frame.gameserver.base.mqtt.serverError
 import com.tmtbe.frame.gameserver.base.scene.Scene
 import com.tmtbe.frame.gameserver.base.service.RoomService
 import com.tmtbe.frame.gameserver.base.utils.SpringUtils
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.util.UUID
-import kotlin.coroutines.coroutineContext
 
-@InternalCoroutinesApi
 abstract class RoomActor(
         name: String,
         scene: Scene
@@ -23,9 +17,6 @@ abstract class RoomActor(
     var sceneName: String
     var roomName: String
     val roomConfiguration: RoomConfiguration
-
-    @Volatile
-    private var isStartDestroy: Boolean = false
 
     init {
         val (_sceneName, _roomName) = name.split("/")
@@ -49,16 +40,16 @@ abstract class RoomActor(
         sendMqttMessage(mqttMessage)
     }
 
-    fun getPlayerActor(playerName: String): PlayerActor? {
-        return children[playerName] as PlayerActor?
+    fun getPlayerActor(playerActorName: String): PlayerActor? {
+        return children[playerActorName] as PlayerActor?
     }
 
-    fun sendMqttToPlayer(playerName: String, body: Any) {
-        val playerActor = getPlayerActor(playerName)
+    fun sendMqttToPlayer(playerActorName: String, body: Any) {
+        val playerActor = getPlayerActor(playerActorName)
         if (playerActor != null) {
             val mqttMessage = MqttMessage(UUID.randomUUID().toString(),
                     body.getMqttMsgType(), body,
-                    TopicTemplate.TopicParse(TopicTemplate.ResponseChannel(playerName),
+                    TopicTemplate.TopicParse(TopicTemplate.ResponseChannel(playerActor.playerName),
                             sceneName, resourceManager.serverName)
             )
             sendMqttMessage(mqttMessage)
@@ -108,11 +99,11 @@ abstract class RoomActor(
     }
 
     override suspend fun destroy() {
-        if (isStartDestroy) return
-        isStartDestroy = true
-        scene.removeActor(this.name)
-        scene.onRoomDestroy(this)
-        SpringUtils.getBean(RoomService::class.java).closeRoom(this)
+        getPlayerActorList().forEach { playerActor ->
+            sendMqttToPlayer(playerActor.name, CloseRoomMsg(this.roomName))
+        }
         super.destroy()
     }
+
+    data class CloseRoomMsg(val roomName: String)
 }

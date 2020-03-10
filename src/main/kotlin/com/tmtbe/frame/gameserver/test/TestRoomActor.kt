@@ -2,11 +2,9 @@ package com.tmtbe.frame.gameserver.test
 
 import com.tmtbe.frame.gameserver.base.actor.*
 import com.tmtbe.frame.gameserver.base.scene.Scene
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 import java.time.Duration
 
-@InternalCoroutinesApi
 class TestRoomActor(name: String,
                     scene: Scene
 ) : RoomActor(name, scene) {
@@ -15,7 +13,7 @@ class TestRoomActor(name: String,
     private var maxCount = (20..30).random()
     private var nowCount = 0
     override fun provideRoomConfiguration(): RoomConfiguration {
-        return RoomConfiguration(4, Duration.ofHours(1))
+        return RoomConfiguration(4, Duration.ofSeconds(5))
     }
 
     override suspend fun onAddedPlayer(playerActor: PlayerActor) {

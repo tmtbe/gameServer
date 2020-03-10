@@ -23,6 +23,7 @@ class LeaveRoomMsgBind(
                 mqttMessage.topicParse.scene,
                 mqttMessage.body!!.roomName
         )
+        responseMessage(mqttMessage, "成功退出房间")
     }
 
     data class LeaveRoomMsg(val roomName: String)
