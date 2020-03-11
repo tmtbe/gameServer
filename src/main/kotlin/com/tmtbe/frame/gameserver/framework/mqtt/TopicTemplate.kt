@@ -50,6 +50,7 @@ class TopicTemplate {
     ) : TopicChannel {
         override fun getType() = TopicChannelType.REQUEST
         override fun getName() = userName
+        fun getPlayerName() = userName
     }
 
     /**
@@ -70,6 +71,7 @@ class TopicTemplate {
     ) : TopicChannel {
         override fun getType() = TopicChannelType.ROOM
         override fun getName() = roomName
+        fun getRoomName() = roomName
     }
 
     interface TopicChannel {

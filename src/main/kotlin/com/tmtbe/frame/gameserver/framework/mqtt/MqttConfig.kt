@@ -60,12 +60,12 @@ class MqttConfig {
             val payload = Charset.defaultCharset().decode(buffer).toString()
             val parseTopic = topicTemplate.parseTopic(topic)
             val parseObject = parseObject(payload)
-            val type = parseObject.getString("type")
-            val binding = mqttMessageBindingList.firstOrNull() { binding ->
-                binding.getClassName().simpleName == type
+            var find = false
+            for (bind in mqttMessageBindingList) {
+                find = bind.buildMessage(parseTopic, parseObject)
+                if (find) break
             }
-            binding?.buildMessage(parseTopic, parseObject)
-            if (binding == null) log.warn("丢弃一个无效信息：$payload")
+            if (!find) log.warn("丢弃一个无效信息：$payload")
         }
         subscribeTopicList.forEach { sub ->
             if (sub.interrupt()) {

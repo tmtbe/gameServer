@@ -3,17 +3,18 @@ package com.tmtbe.frame.gameserver.framework.mqtt.message
 import com.tmtbe.frame.gameserver.framework.mqtt.MqttMessage
 import com.tmtbe.frame.gameserver.framework.mqtt.MqttMessageBinding
 import com.tmtbe.frame.gameserver.framework.mqtt.TopicTemplate
+import com.tmtbe.frame.gameserver.framework.scene.Scene
 import com.tmtbe.frame.gameserver.framework.service.RoomService
 import com.tmtbe.frame.gameserver.framework.stereotype.GameMqttMessageBinding
 
 @GameMqttMessageBinding
 class CreateRoomMsgBind(
-        val roomService: RoomService
+        private val roomService: RoomService
 ) : MqttMessageBinding<CreateRoomMsgBind.CreateRoomMsg>() {
 
-    override fun getClassName(): Class<CreateRoomMsg> = CreateRoomMsg::class.java
+    override fun getClassName(type: String) = CreateRoomMsg::class.java
 
-    override suspend fun handleMessage(mqttMessage: MqttMessage<CreateRoomMsg>) {
+    override suspend fun handleMessage(mqttMessage: MqttMessage<CreateRoomMsg>, scene: Scene) {
         val requestChannel = mqttMessage.topicParse.topicChannel as TopicTemplate.ClientChannel
         val roomName = System.currentTimeMillis().toString()
         val playerRoom = roomService.getPlayerRoom(requestChannel.getName())

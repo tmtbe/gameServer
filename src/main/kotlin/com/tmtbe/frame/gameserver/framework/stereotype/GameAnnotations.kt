@@ -14,6 +14,11 @@ annotation class GameScene(val value: String = "")
 @Component
 annotation class GameMqttMessageBinding(val value: String = "")
 
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
+@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+annotation class GameActorMessage(val value: String = "")
+
 
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
