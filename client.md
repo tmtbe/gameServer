@@ -1,4 +1,4 @@
-CLIENT_REQUEST/client2/test/all
+REQUEST/client2/demoB/all
 
 { "requestId": "123","type":"CreateRoomMsg" }
 

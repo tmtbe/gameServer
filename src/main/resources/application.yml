@@ -2,6 +2,8 @@ spring:
   cloud:
     discovery:
       enabled: false
+    inetutils:
+      timeout-seconds: 0
   application:
     name: gameServer1
   mqtt:
