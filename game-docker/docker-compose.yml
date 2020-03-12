@@ -1,0 +1,30 @@
+version: '3.3'
+services:
+  rabbit:
+    image: heidiks/rabbitmq-delayed-message-exchange:latest
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - 5672:5672
+      - 15672:15672
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    command: [ "redis-server", "/etc/redis/redis.conf" ]
+    volumes:
+      - ./redis:/etc/redis
+  emqx:
+    image: emqx/emqx:v4.0.4-alpine3.10-amd64
+    ports:
+      - 1883:1883
+      - 8081:8081
+      - 8083:8083
+      - 8883:8883
+      - 8084:8084
+      - 11883:11883
+      - 18083:18083
+    volumes:
+      - ./emqx/etc:/opt/emqx/etc
+      - ./emqx/data/loaded_plugins:/opt/emqx/data/loaded_plugins
