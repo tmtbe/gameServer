@@ -1,8 +1,8 @@
 package com.tmtbe.frame.gameserver.framework.service
 
 import com.tmtbe.frame.gameserver.framework.actor.RoomActor
-import com.tmtbe.frame.gameserver.framework.mqtt.TopicTemplate
-import com.tmtbe.frame.gameserver.framework.mqtt.serverError
+import com.tmtbe.frame.gameserver.framework.message.TopicTemplate
+import com.tmtbe.frame.gameserver.framework.message.serverError
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager.Companion.PLAYER_ON_SERVER_SCENE_ROOM
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager.Companion.ROOM_ON_GAME_SERVER

@@ -1,9 +1,9 @@
 package com.tmtbe.frame.gameserver.framework.actor
 
-import com.tmtbe.frame.gameserver.framework.mqtt.MqttMessage
-import com.tmtbe.frame.gameserver.framework.mqtt.TopicTemplate
-import com.tmtbe.frame.gameserver.framework.mqtt.getMqttMsgType
-import com.tmtbe.frame.gameserver.framework.mqtt.serverError
+import com.tmtbe.frame.gameserver.framework.message.MqttMessage
+import com.tmtbe.frame.gameserver.framework.message.TopicTemplate
+import com.tmtbe.frame.gameserver.framework.message.getMqttMsgType
+import com.tmtbe.frame.gameserver.framework.message.serverError
 import com.tmtbe.frame.gameserver.framework.scene.Scene
 import java.time.Duration
 import java.util.UUID

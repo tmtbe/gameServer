@@ -4,9 +4,9 @@ import com.tmtbe.frame.gameserver.framework.actor.Actor
 import com.tmtbe.frame.gameserver.framework.actor.MqttMsg
 import com.tmtbe.frame.gameserver.framework.actor.PlayerActor
 import com.tmtbe.frame.gameserver.framework.actor.RoomActor
-import com.tmtbe.frame.gameserver.framework.mqtt.MqttGateWay
-import com.tmtbe.frame.gameserver.framework.mqtt.MqttMessage
-import com.tmtbe.frame.gameserver.framework.mqtt.serverError
+import com.tmtbe.frame.gameserver.framework.message.MqttGateWay
+import com.tmtbe.frame.gameserver.framework.message.MqttMessage
+import com.tmtbe.frame.gameserver.framework.message.serverError
 import com.tmtbe.frame.gameserver.framework.utils.RedisUtils
 import com.tmtbe.frame.gameserver.framework.utils.log
 import com.tmtbe.frame.gameserver.framework.utils.toJson

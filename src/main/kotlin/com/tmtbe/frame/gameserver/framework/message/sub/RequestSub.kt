@@ -1,7 +1,7 @@
-package com.tmtbe.frame.gameserver.framework.mqtt.sub
+package com.tmtbe.frame.gameserver.framework.message.sub
 
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager
-import com.tmtbe.frame.gameserver.framework.stereotype.GameSubscribeTopic
+import com.tmtbe.frame.gameserver.framework.annotation.GameSubscribeTopic
 
 @GameSubscribeTopic
 class RequestSub(val resourceManager: ResourceManager) : SubscribeTopic {

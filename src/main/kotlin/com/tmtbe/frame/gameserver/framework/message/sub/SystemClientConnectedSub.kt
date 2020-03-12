@@ -1,8 +1,8 @@
-package com.tmtbe.frame.gameserver.framework.mqtt.sub
+package com.tmtbe.frame.gameserver.framework.message.sub
 
-import com.tmtbe.frame.gameserver.framework.mqtt.sub.SubscribeTopic.MqttSubscribeMessage
+import com.tmtbe.frame.gameserver.framework.message.sub.SubscribeTopic.MqttSubscribeMessage
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager
-import com.tmtbe.frame.gameserver.framework.stereotype.GameSubscribeTopic
+import com.tmtbe.frame.gameserver.framework.annotation.GameSubscribeTopic
 import com.tmtbe.frame.gameserver.framework.utils.toJsonObject
 
 @GameSubscribeTopic

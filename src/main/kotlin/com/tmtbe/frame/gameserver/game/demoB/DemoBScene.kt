@@ -2,7 +2,7 @@ package com.tmtbe.frame.gameserver.game.demoB
 
 import com.tmtbe.frame.gameserver.framework.actor.RoomActor
 import com.tmtbe.frame.gameserver.framework.scene.Scene
-import com.tmtbe.frame.gameserver.framework.stereotype.GameScene
+import com.tmtbe.frame.gameserver.framework.annotation.GameScene
 
 @GameScene
 class DemoBScene : Scene(

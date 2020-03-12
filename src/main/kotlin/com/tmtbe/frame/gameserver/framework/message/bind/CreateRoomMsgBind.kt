@@ -1,11 +1,11 @@
-package com.tmtbe.frame.gameserver.framework.mqtt.message
+package com.tmtbe.frame.gameserver.framework.message.bind
 
-import com.tmtbe.frame.gameserver.framework.mqtt.MqttMessage
-import com.tmtbe.frame.gameserver.framework.mqtt.MqttMessageBinding
-import com.tmtbe.frame.gameserver.framework.mqtt.TopicTemplate
+import com.tmtbe.frame.gameserver.framework.message.MqttMessage
+import com.tmtbe.frame.gameserver.framework.message.MqttMessageBinding
+import com.tmtbe.frame.gameserver.framework.message.TopicTemplate
 import com.tmtbe.frame.gameserver.framework.scene.Scene
 import com.tmtbe.frame.gameserver.framework.service.RoomService
-import com.tmtbe.frame.gameserver.framework.stereotype.GameMqttMessageBinding
+import com.tmtbe.frame.gameserver.framework.annotation.GameMqttMessageBinding
 
 @GameMqttMessageBinding
 class CreateRoomMsgBind(

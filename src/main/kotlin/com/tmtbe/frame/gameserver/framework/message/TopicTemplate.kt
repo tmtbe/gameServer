@@ -1,4 +1,4 @@
-package com.tmtbe.frame.gameserver.framework.mqtt
+package com.tmtbe.frame.gameserver.framework.message
 
 import org.springframework.stereotype.Component
 

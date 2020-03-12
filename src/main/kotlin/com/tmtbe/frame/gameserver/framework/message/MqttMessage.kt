@@ -1,4 +1,4 @@
-package com.tmtbe.frame.gameserver.framework.mqtt
+package com.tmtbe.frame.gameserver.framework.message
 
 import com.alibaba.fastjson.JSONObject
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager
@@ -6,7 +6,6 @@ import com.tmtbe.frame.gameserver.framework.scene.Scene
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.reflect.KClass
 
 data class MqttMessage<T>(
         val requestId: String?,

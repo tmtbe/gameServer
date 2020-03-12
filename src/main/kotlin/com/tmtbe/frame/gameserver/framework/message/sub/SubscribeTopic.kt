@@ -1,4 +1,4 @@
-package com.tmtbe.frame.gameserver.framework.mqtt.sub
+package com.tmtbe.frame.gameserver.framework.message.sub
 
 interface SubscribeTopic {
     fun subTopics(): List<String>

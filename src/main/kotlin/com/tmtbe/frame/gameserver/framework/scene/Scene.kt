@@ -2,7 +2,7 @@ package com.tmtbe.frame.gameserver.framework.scene
 
 import com.tmtbe.frame.gameserver.framework.actor.PlayerActor
 import com.tmtbe.frame.gameserver.framework.actor.RoomActor
-import com.tmtbe.frame.gameserver.framework.mqtt.serverError
+import com.tmtbe.frame.gameserver.framework.message.serverError
 import com.tmtbe.frame.gameserver.framework.utils.log
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Matcher

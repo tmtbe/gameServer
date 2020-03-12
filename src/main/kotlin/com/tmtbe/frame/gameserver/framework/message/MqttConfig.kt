@@ -1,4 +1,4 @@
-package com.tmtbe.frame.gameserver.framework.mqtt
+package com.tmtbe.frame.gameserver.framework.message
 
 import com.alibaba.fastjson.JSON.parseObject
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter
@@ -7,7 +7,7 @@ import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth
 import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3Connect
-import com.tmtbe.frame.gameserver.framework.mqtt.sub.SubscribeTopic
+import com.tmtbe.frame.gameserver.framework.message.sub.SubscribeTopic
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager
 import com.tmtbe.frame.gameserver.framework.utils.log
 import kotlinx.coroutines.GlobalScope
