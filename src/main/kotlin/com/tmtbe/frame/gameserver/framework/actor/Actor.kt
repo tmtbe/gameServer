@@ -80,11 +80,17 @@ abstract class Actor(
     private suspend fun onStart(isActive: Boolean) {
         onCreate()
         while (isActive) {
-            if (System.currentTimeMillis() - startTime > getMaxKeepAliveTime().toMillis()) destroy()
-            onEventTime()
+            if (getRunTime() > getMaxKeepAliveTime().toMillis()) destroy()
+            try {
+                onEventTime()
+            } catch (e: Throwable) {
+                log.error("onEventTime发生错误", e)
+            }
             delay(100)
         }
     }
+
+    protected fun getRunTime() = System.currentTimeMillis() - startTime
 
     private suspend fun onReceive(msg: ActorMsg) {
         when (msg) {
@@ -238,13 +244,6 @@ class RequestMsg<T, E>(val request: E) : ActorMsg() {
     suspend fun send(msg: T) {
         GlobalScope.launch(coroutineContext) {
             channel.send(msg)
-        }
-    }
-
-    suspend fun after(time: Long, callback: () -> Unit) {
-        GlobalScope.launch(coroutineContext) {
-            delay(time)
-            callback()
         }
     }
 }

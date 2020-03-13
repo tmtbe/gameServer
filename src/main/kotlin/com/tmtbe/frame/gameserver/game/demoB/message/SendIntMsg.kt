@@ -4,5 +4,5 @@ import com.tmtbe.frame.gameserver.framework.annotation.GameActorMessage
 
 @GameActorMessage
 data class SendIntMsg(
-        val value: Int? = null
+        val value: Int
 )

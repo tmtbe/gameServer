@@ -103,5 +103,12 @@ abstract class RoomActor(
         super.destroy()
     }
 
+    suspend fun addRobot(robotClass: Class<out PlayerActor>, robotName: String) {
+        val robotActorName = "$sceneName/$roomName/$robotName"
+        val playerActor = robotClass.getConstructor(String::class.java, Scene::class.java)
+                .newInstance(robotActorName, scene) as PlayerActor
+        addChild(playerActor)
+    }
+
     data class CloseRoomMsg(val roomName: String)
 }

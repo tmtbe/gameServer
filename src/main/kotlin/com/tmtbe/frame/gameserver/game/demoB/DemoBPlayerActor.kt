@@ -2,13 +2,14 @@ package com.tmtbe.frame.gameserver.game.demoB
 
 import com.tmtbe.frame.gameserver.framework.actor.*
 import com.tmtbe.frame.gameserver.framework.scene.Scene
+import com.tmtbe.frame.gameserver.game.demoB.message.SendIntMsg
 import kotlinx.coroutines.delay
 import java.time.Duration
 
-class TestPlayerActor(name: String,
-                      scene: Scene
+open class DemoBPlayerActor(name: String,
+                            scene: Scene
 ) : PlayerActor(name, scene) {
-    private var status: String = "NORMAL"
+    var status: String = "NORMAL"
     override suspend fun handleRequestMsg(msg: RequestMsg<Any, Any>): Boolean {
         msg.registerEverySecondHandle {
             getRoomActor().sendMqttToRoom("${name}: 倒计时 ${4 - it / 1000} 秒")
@@ -55,12 +56,8 @@ class TestPlayerActor(name: String,
         if (hasRequestMsg()) {
             val requestMsg = getRequestMsg()
             when (val request = requestMsg.request) {
-                is CMDPayload -> {
-                    when (request.CMD) {
-                        "GET" -> {
-                            requestMsg.send(msg.payload)
-                        }
-                    }
+                is SendIntMsg -> {
+                    requestMsg.send(request.value)
                 }
             }
         }

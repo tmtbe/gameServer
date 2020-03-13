@@ -1,15 +1,11 @@
 package com.tmtbe.frame.gameserver.framework.actor
 
 import com.tmtbe.frame.gameserver.framework.scene.Scene
-import com.tmtbe.frame.gameserver.framework.service.RoomService
-import com.tmtbe.frame.gameserver.framework.utils.SpringUtils
 
 abstract class PlayerActor(
         name: String,
         scene: Scene
 ) : Actor(name, scene) {
-    @Volatile
-    private var isStartDestroy: Boolean = false
 
     @Volatile
     private var isOnline: Boolean = true
@@ -50,12 +46,5 @@ abstract class PlayerActor(
 
     fun onDisconnected() {
         isOnline = false
-    }
-
-    override suspend fun destroy() {
-        if (isStartDestroy) return
-        isStartDestroy = true
-        SpringUtils.getBean(RoomService::class.java).playerOuterRoom(playerName, sceneName, roomName)
-        super.destroy()
     }
 }

@@ -8,11 +8,11 @@ import java.time.Duration
 class DemoBRoomActor(name: String,
                      scene: Scene
 ) : RoomActor(name, scene) {
-    private var status = ""
+    private var status = "INIT"
     private var maxCount = (20..30).random()
     private var nowCount = 0
     override fun provideRoomConfiguration(): RoomConfiguration {
-        return RoomConfiguration(1, Duration.ofSeconds(20))
+        return RoomConfiguration(4, Duration.ofSeconds(20))
     }
 
     override suspend fun onAddedPlayer(playerActor: PlayerActor) {
@@ -33,6 +33,14 @@ class DemoBRoomActor(name: String,
 
     override suspend fun onEventTime() {
         when (status) {
+            "INIT" -> {
+                if (getRunTime() > 3000) status = "INIT_TIMEOUT"
+            }
+            "INIT_TIMEOUT" -> {
+                if (!isFull()) {
+                    addRobot(DemoBRobotActor::class.java, "robot${children.size}")
+                }
+            }
             "START" -> {
                 delay(1000)
                 getPlayerActorList().forEach { player ->

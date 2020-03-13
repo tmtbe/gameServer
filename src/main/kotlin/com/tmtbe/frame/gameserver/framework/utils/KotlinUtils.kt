@@ -42,5 +42,12 @@ suspend fun <T> Channel<T>.receiveTimeOut(
     }
 }
 
+suspend fun after(time: Long, callback: suspend () -> Unit) {
+    GlobalScope.launch(coroutineContext) {
+        delay(time)
+        callback()
+    }
+}
+
 fun Any.toJson(): String = JSON.toJSONString(this)
 fun <T> String.toJsonObject(clazz: Class<T>) = JSON.parseObject(this, clazz)

@@ -5,7 +5,7 @@ import com.tmtbe.frame.gameserver.framework.scene.Scene
 import kotlinx.coroutines.delay
 import java.time.Duration
 
-class TestPlayerActor(name: String,
+class DemoAPlayerActor(name: String,
                       scene: Scene
 ) : PlayerActor(name, scene) {
     private var status: String = "NORMAL"

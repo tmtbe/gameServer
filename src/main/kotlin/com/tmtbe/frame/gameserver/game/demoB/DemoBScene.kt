@@ -8,7 +8,7 @@ import com.tmtbe.frame.gameserver.framework.annotation.GameScene
 class DemoBScene : Scene(
         "demoB",
         DemoBRoomActor::class.java,
-        TestPlayerActor::class.java
+        DemoBPlayerActor::class.java
 ) {
     override suspend fun onRoomCreate(roomActor: RoomActor) {
         log.info("${roomActor.name}:创建了")
