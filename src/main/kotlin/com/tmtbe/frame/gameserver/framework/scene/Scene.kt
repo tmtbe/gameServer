@@ -1,5 +1,6 @@
 package com.tmtbe.frame.gameserver.framework.scene
 
+import com.tmtbe.frame.gameserver.framework.actor.AddActorMsg
 import com.tmtbe.frame.gameserver.framework.actor.PlayerActor
 import com.tmtbe.frame.gameserver.framework.actor.RoomActor
 import com.tmtbe.frame.gameserver.framework.message.serverError
@@ -10,8 +11,8 @@ import java.util.regex.Pattern
 
 abstract class Scene(
         val name: String,
-        private val roomActor: Class<*>,
-        private val playerActor: Class<*>
+        private val roomActor: Class<out RoomActor>,
+        private val playerActor: Class<out PlayerActor>
 ) {
     protected val log = log()
     var resourceManager: ResourceManager? = null
@@ -47,7 +48,7 @@ abstract class Scene(
         }
     }
 
-    suspend fun createPlayer(roomName: String, playerName: String): PlayerActor {
+    suspend fun createPlayer(roomName: String, playerName: String, playerActor: Class<out PlayerActor>): PlayerActor {
         matchName(playerName)
         matchName(roomName)
         if (playerActors.containsKey(playerName)) serverError("玩家同一个游戏只允许进入一个房间:$playerName")
@@ -58,8 +59,18 @@ abstract class Scene(
         val playerActor = playerActor.getConstructor(String::class.java, Scene::class.java)
                 .newInstance(newPlayerName, this) as PlayerActor
         addPlayerActor(playerActor)
-        roomActor.addChild(playerActor)
-        return playerActor
+        val addActorMsg = AddActorMsg<Any>(playerActor)
+        roomActor.send(addActorMsg)
+        val addActorResult = addActorMsg.response.await()
+        if (addActorResult.success) {
+            return playerActor
+        } else {
+            serverError(addActorResult.error)
+        }
+    }
+
+    suspend fun createPlayer(roomName: String, playerName: String): PlayerActor {
+        return createPlayer(roomName, playerName, playerActor)
     }
 
     private fun addPlayerActor(playerActor: PlayerActor) {

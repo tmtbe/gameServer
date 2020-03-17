@@ -38,7 +38,7 @@ class DemoBRoomActor(name: String,
             }
             "INIT_TIMEOUT" -> {
                 if (!isFull()) {
-                    addRobot(DemoBRobotActor::class.java, "robot${children.size}")
+                    scene.createPlayer(roomName, "robot${children.size}", DemoBRobotActor::class.java)
                 }
             }
             "START" -> {

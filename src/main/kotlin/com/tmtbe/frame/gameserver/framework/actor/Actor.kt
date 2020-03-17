@@ -94,6 +94,14 @@ abstract class Actor(
 
     private suspend fun onReceive(msg: ActorMsg) {
         when (msg) {
+            is AddActorMsg<*> -> {
+                try {
+                    addChild(msg.actor)
+                    msg.response.complete(AddActorMsg.AddActorResult(true, null))
+                } catch (e: Throwable) {
+                    msg.response.complete(AddActorMsg.AddActorResult(false, e.message))
+                }
+            }
             is MqttMsg -> {
                 handleMqttMsg(msg)
             }
@@ -128,7 +136,7 @@ abstract class Actor(
 
     protected abstract suspend fun onRemovedChild(child: Actor)
 
-    open suspend fun addChild(child: Actor) {
+    protected open suspend fun addChild(child: Actor) {
         if (child.parent != null) serverError("child有parent，不允许加入")
         if (child.isStartDestroy) serverError("child处于销毁状态，不允许加入")
         if (this.isStartDestroy) serverError("自身处于销毁状态，不允许加入")
@@ -144,11 +152,11 @@ abstract class Actor(
         }
     }
 
-    suspend fun removeChild(child: Actor) {
+    protected open suspend fun removeChild(child: Actor) {
         child.destroy()
     }
 
-    suspend fun removeChild(name: String) {
+    protected open suspend fun removeChild(name: String) {
         children[name]?.destroy()
     }
 
@@ -202,6 +210,15 @@ abstract class Actor(
 }
 
 sealed class ActorMsg
+class AddActorMsg<T>(val actor: Actor) : ActorMsg() {
+    var response: CompletableDeferred<AddActorResult> = CompletableDeferred()
+
+    data class AddActorResult(
+            val success: Boolean,
+            val error: String?
+    )
+}
+
 class NoticeMsg<E>(val message: E) : ActorMsg()
 class MqttMsg(val payload: MqttMessage<*>) : ActorMsg()
 class RequestMsg<T, E>(val request: E) : ActorMsg() {

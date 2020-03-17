@@ -104,6 +104,6 @@ data class ErrorMessage(
 
 fun Any.getMqttMsgType(): String = this.javaClass.simpleName
 
-public inline fun serverError(message: Any): Nothing {
+public inline fun serverError(message: Any?): Nothing {
     return throw ErrorMessageException(message.toString())
 }
