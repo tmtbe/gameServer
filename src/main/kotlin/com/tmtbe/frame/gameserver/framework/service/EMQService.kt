@@ -27,7 +27,7 @@ class EMQService(
     }
 
     suspend fun addUser(userName: String, password: String, isSuperuser: Boolean = false) {
-        redisUtils.hSet("mqtt_user:$userName", password, password)
+        redisUtils.hSet("mqtt_user:$userName", "password", password)
         if (isSuperuser) {
             redisUtils.hSet("mqtt_user:$userName", "is_superuser", "1")
         }

@@ -12,7 +12,7 @@ local oldKey = redis.call("hget","PLAYER_MATCH",playerName)
 if oldKey
 then
     redis.call("srem",oldKey,playerName)
-end
+   end
 
 redis.call("sadd",setKey,playerName)
 redis.call("hset","PLAYER_MATCH",playerName,setKey)

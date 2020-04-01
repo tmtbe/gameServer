@@ -79,7 +79,7 @@ class ResourceManager(sceneList: List<Scene>) {
     }
 
     fun registerScene(scene: Scene) {
-        if(sceneMap.containsKey(scene.name)) error("已存在同名的Scene")
+        if (sceneMap.containsKey(scene.name)) error("已存在同名的Scene")
         sceneMap[scene.name] = scene
         log.info("新增一个场景：${scene.name}")
     }
@@ -132,15 +132,20 @@ class ResourceManager(sceneList: List<Scene>) {
         this.mqttGateWays.add(mqttGateWay)
     }
 
-    fun onPlayerConnected(username: String) {
+    suspend fun onPlayerConnected(username: String) {
         sceneMap.forEach {
             it.value.onPlayerConnected(username)
         }
     }
 
-    fun onPlayerDisconnected(username: String) {
+    suspend fun onPlayerDisconnected(username: String) {
         sceneMap.forEach {
             it.value.onPlayerDisconnected(username)
+        }
+        // 移除匹配
+        val match = redisUtils.hGet("PLAYER_MATCH", username)
+        if (match != null) {
+            redisUtils.sDel(match, username)
         }
     }
 
