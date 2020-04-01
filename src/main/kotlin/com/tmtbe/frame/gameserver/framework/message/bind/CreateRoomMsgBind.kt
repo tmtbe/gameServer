@@ -12,7 +12,13 @@ class CreateRoomMsgBind(
         private val roomService: RoomService
 ) : MqttMessageBinding<CreateRoomMsgBind.CreateRoomMsg>() {
 
-    override fun getClassName(type: String) = CreateRoomMsg::class.java
+    override fun getClassName(type: String): Class<out CreateRoomMsg>? {
+        return if (type == CreateRoomMsg::class.simpleName) {
+            CreateRoomMsg::class.java
+        } else {
+            null
+        }
+    }
 
     override suspend fun handleMessage(mqttMessage: MqttMessage<CreateRoomMsg>, scene: Scene) {
         val requestChannel = mqttMessage.topicParse.topicChannel as TopicTemplate.ClientChannel

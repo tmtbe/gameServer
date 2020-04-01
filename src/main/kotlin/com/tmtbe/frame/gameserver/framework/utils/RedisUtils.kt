@@ -114,5 +114,4 @@ class RedisUtils(reactiveRedisTemplate: ReactiveRedisTemplate<*, *>) {
     suspend fun lGet(key: String, start: Long, end: Long): List<String>? {
         return redisTemplate.opsForList().range(key, start, end).collectList().awaitFirstOrNull()
     }
-
 }

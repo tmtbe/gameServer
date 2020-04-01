@@ -12,7 +12,8 @@ import java.util.regex.Pattern
 abstract class Scene(
         val name: String,
         private val roomActor: Class<out RoomActor>,
-        private val playerActor: Class<out PlayerActor>
+        private val playerActor: Class<out PlayerActor>,
+        val configuration: SceneConfiguration
 ) {
     protected val log = log()
     var resourceManager: ResourceManager? = null
@@ -106,3 +107,8 @@ abstract class Scene(
         return roomActors.containsKey("$name/$roomName")
     }
 }
+
+data class SceneConfiguration(
+        // 需要多少玩家才能开始游戏，主要用于匹配
+        val matchedNeedPlayerNum: Int
+)

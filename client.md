@@ -6,3 +6,6 @@ REQUEST/client2/demoB/all
 
 
 { "requestId": "123","type":"SendIntMsg" }
+
+{ "requestId": "123","type":"MatchMsg","body": {"roomLevel":"high"} }
+
