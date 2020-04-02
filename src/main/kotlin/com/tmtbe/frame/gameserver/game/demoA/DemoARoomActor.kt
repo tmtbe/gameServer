@@ -18,7 +18,7 @@ class DemoARoomActor(name: String,
     override suspend fun onAddedPlayer(playerActor: PlayerActor) {
         sendMqttToRoom("$name: ${playerActor.name}加入了房间")
         if (getPlayerActorList().size == scene.configuration.matchedNeedPlayerNum) {
-            //status = "START"
+           // status = "START"
             sendMqttToRoom("$name: 开始")
         }
     }

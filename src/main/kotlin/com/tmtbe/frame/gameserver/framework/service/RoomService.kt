@@ -72,14 +72,15 @@ class RoomService(
         val createTopic = topicTemplate.createTopic(
                 TopicTemplate.RoomChannel(roomName), sceneName, resourceManager.serverName
         )
-        // 优先订阅否则刚加进去的收不到消息
+        //提前订阅防止出现收不到信息的问题
         emqService.subscribe(playerName, createTopic)
         try {
             if (playerActor == null) {
                 playerActor = scene.createPlayer(roomName, playerName)
             }
-        } finally {
+        } catch (e: Throwable) {
             emqService.unsubscribe(playerName, createTopic)
+            throw e
         }
         redisUtils.hSet(PLAYER_ON_SERVER_SCENE_ROOM, playerName,
                 PlayerServerRoom(playerName, resourceManager.serverName, sceneName, roomName).toJson())
