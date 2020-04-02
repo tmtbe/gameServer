@@ -4,22 +4,17 @@ import com.tmtbe.frame.gameserver.framework.annotation.GameMqttMessageBinding
 import com.tmtbe.frame.gameserver.framework.message.MqttMessage
 import com.tmtbe.frame.gameserver.framework.message.MqttMessageBinding
 import com.tmtbe.frame.gameserver.framework.message.TopicTemplate
-import com.tmtbe.frame.gameserver.framework.message.sub.MatchSuccessSub
 import com.tmtbe.frame.gameserver.framework.scene.Scene
-import com.tmtbe.frame.gameserver.framework.service.RoomService
-import com.tmtbe.frame.gameserver.framework.utils.RedisUtils
-import com.tmtbe.frame.gameserver.framework.utils.toJson
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.core.io.ClassPathResource
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.scripting.support.ResourceScriptSource
 import java.util.List
+import java.util.UUID
 
 @GameMqttMessageBinding
 class MatchMsgBind(
-        private val roomService: RoomService,
-        private val redisUtils: RedisUtils,
         private val reactiveRedisTemplate: ReactiveRedisTemplate<String, *>
 ) : MqttMessageBinding<MatchMsgBind.MatchMsg>() {
     private val redisScript: DefaultRedisScript<List<*>> = DefaultRedisScript<List<*>>()
@@ -37,9 +32,11 @@ class MatchMsgBind(
                         listOf(scene.configuration.matchedNeedPlayerNum.toString()))
                 .awaitFirst()
         if (result.isNotEmpty()) {
-            resourceManager.getMqttGatWay().sendToMqtt(
-                    MatchSuccessSub.MatchSuccessMsg(scene.name, result.map { it.toString() }, mqttMessage.body.roomLevel).toJson(),
-                    "MATCHED/${scene.name}")
+            resourceManager.sendMqttMessage(MqttMessage(UUID.randomUUID().toString(),
+                    MatchSuccessMsgBind.MatchSuccessMsg::class.simpleName!!,
+                    MatchSuccessMsgBind.MatchSuccessMsg(scene.name, result.map { it.toString() }, mqttMessage.body.roomLevel),
+                    TopicTemplate.TopicParse(TopicTemplate.InternalServerChannel(resourceManager.serverName), scene.name, "all")
+            ))
         }
     }
 
@@ -48,10 +45,10 @@ class MatchMsgBind(
     )
 
     override fun getClassName(type: String): Class<out MatchMsg>? {
-        if (type.equals(MatchMsg::class.simpleName)) {
-            return MatchMsg::class.java
+        return if (type == MatchMsg::class.simpleName) {
+            MatchMsg::class.java
         } else {
-            return null
+            null
         }
     }
 }

@@ -69,18 +69,23 @@ class RoomService(
         val scene = resourceManager.getScene(sceneName)!!
         val roomActor = scene.getRoomActor(roomName) ?: serverError("room 不存在")
         var playerActor = roomActor.getPlayerActor("$sceneName/$roomName/$playerName")
-        if (playerActor == null) {
-            playerActor = scene.createPlayer(roomName, playerName)
-        }
         val createTopic = topicTemplate.createTopic(
                 TopicTemplate.RoomChannel(roomName), sceneName, resourceManager.serverName
         )
+        // 优先订阅否则刚加进去的收不到消息
         emqService.subscribe(playerName, createTopic)
+        try {
+            if (playerActor == null) {
+                playerActor = scene.createPlayer(roomName, playerName)
+            }
+        } finally {
+            emqService.unsubscribe(playerName, createTopic)
+        }
         redisUtils.hSet(PLAYER_ON_SERVER_SCENE_ROOM, playerName,
                 PlayerServerRoom(playerName, resourceManager.serverName, sceneName, roomName).toJson())
         redisUtils.sSet("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName",
                 PlayerRoomTopic(playerName, createTopic).toJson())
-        playerActor.addHookOnDestroy {
+        playerActor!!.addHookOnDestroy {
             log.info("remove player sub/redis info:$playerName")
             emqService.unsubscribe(playerName, createTopic)
             redisUtils.hDel(PLAYER_ON_SERVER_SCENE_ROOM, playerName)

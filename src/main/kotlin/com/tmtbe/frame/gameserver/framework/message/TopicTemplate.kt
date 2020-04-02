@@ -28,6 +28,9 @@ class TopicTemplate {
                 TopicChannelType.ROOM -> {
                     TopicParse(RoomChannel(topicChannelName), scene, server)
                 }
+                TopicChannelType.SERVER -> {
+                    TopicParse(InternalServerChannel(topicChannelName), scene, server)
+                }
             }
         }
     }
@@ -74,13 +77,24 @@ class TopicTemplate {
         fun getRoomName() = roomName
     }
 
+    /**
+     * 服务器之间通讯
+     */
+    class InternalServerChannel(
+            private val serverName: String
+    ) : TopicChannel {
+        override fun getType() = TopicChannelType.SERVER
+        override fun getName() = serverName
+        fun getServerName() = serverName
+    }
+
     interface TopicChannel {
         fun getType(): TopicChannelType
         fun getName(): String
     }
 
     enum class TopicChannelType {
-        REQUEST, RESPONSE, ROOM
+        REQUEST, RESPONSE, ROOM, SERVER
     }
 
 }

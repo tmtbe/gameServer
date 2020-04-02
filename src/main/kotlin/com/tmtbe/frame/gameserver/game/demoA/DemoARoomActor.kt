@@ -12,13 +12,13 @@ class DemoARoomActor(name: String,
     private var maxCount = (20..30).random()
     private var nowCount = 0
     override fun provideRoomConfiguration(): RoomConfiguration {
-        return RoomConfiguration(4, Duration.ofSeconds(20))
+        return RoomConfiguration(4, Duration.ofSeconds(200))
     }
 
     override suspend fun onAddedPlayer(playerActor: PlayerActor) {
         sendMqttToRoom("$name: ${playerActor.name}加入了房间")
-        if (getPlayerActorList().size == provideRoomConfiguration().maxPlayerNumber) {
-            status = "START"
+        if (getPlayerActorList().size == scene.configuration.matchedNeedPlayerNum) {
+            //status = "START"
             sendMqttToRoom("$name: 开始")
         }
     }

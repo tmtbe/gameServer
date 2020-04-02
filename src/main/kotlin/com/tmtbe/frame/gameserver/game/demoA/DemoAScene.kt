@@ -10,7 +10,7 @@ class DemoAScene : Scene(
         "demoA",
         DemoARoomActor::class.java,
         DemoAPlayerActor::class.java,
-        SceneConfiguration(4)
+        SceneConfiguration(2)
 ) {
     override suspend fun onRoomCreate(roomActor: RoomActor) {
         log.info("${roomActor.name}:创建了")

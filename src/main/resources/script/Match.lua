@@ -1,3 +1,4 @@
+redis.replicate_commands()
 --获取KEY
 local setKey = KEYS[1]
 local playerName = KEYS[2]
