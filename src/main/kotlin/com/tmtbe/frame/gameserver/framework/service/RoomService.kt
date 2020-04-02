@@ -98,7 +98,7 @@ class RoomService(
         roomActor.destroy()
     }
 
-    suspend fun createRoom(sceneName: String, roomName: String) {
+    suspend fun createRoom(sceneName: String, roomName: String): RoomActor {
         val scene = resourceManager.getScene(sceneName) ?: serverError("不存在的Scene")
         if (hasRoom(sceneName, roomName)) serverError("已存在相同名称的room:$roomName")
         val createRoom = scene.createRoom(roomName)
@@ -112,6 +112,7 @@ class RoomService(
             redisUtils.hDel(ROOM_ON_GAME_SERVER, "$sceneName/$roomName")
             redisUtils.del("$SCENE_ROOM_HAS_PLAYER_SUB_$sceneName/$roomName")
         }
+        return createRoom
     }
 
     suspend fun hasRoom(sceneName: String, roomName: String): Boolean {
