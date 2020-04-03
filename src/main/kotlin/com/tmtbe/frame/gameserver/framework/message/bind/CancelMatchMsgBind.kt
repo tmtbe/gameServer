@@ -16,11 +16,14 @@ class CancelMatchMsgBind(
         val requestChannel = mqttMessage.topicParse.topicChannel as TopicTemplate.ClientChannel
         val matchName = "MATCH_" + scene.name + "_" + mqttMessage.body!!.roomLevel
         redisUtils.sDel(matchName, requestChannel.getPlayerName())
+        responseMessage(mqttMessage, CancelMatchMsgResp())
     }
 
     class CancelMatchMsg(
             val roomLevel: String
     )
+
+    class CancelMatchMsgResp
 
     override fun getClassName(type: String): Class<out CancelMatchMsg>? {
         return if (type == CancelMatchMsg::class.simpleName) {
