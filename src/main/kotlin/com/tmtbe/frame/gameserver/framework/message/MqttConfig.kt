@@ -56,16 +56,22 @@ class MqttConfig {
                         .build()).build())
         client.toAsync().publishes(MqttGlobalPublishFilter.UNSOLICITED) { pub ->
             val topic: String = pub.topic.toString()
-            val buffer = pub.payload.get()
-            val payload = Charset.defaultCharset().decode(buffer).toString()
-            val parseTopic = topicTemplate.parseTopic(topic)
-            val parseObject = parseObject(payload)
-            var find = false
-            for (bind in mqttMessageBindingList) {
-                find = bind.buildMessage(parseTopic, parseObject)
-                if (find) break
+            if (pub.payload.isPresent) {
+                val buffer = pub.payload.get()
+                val payload = Charset.defaultCharset().decode(buffer).toString()
+                val parseTopic = topicTemplate.parseTopic(topic)
+                try {
+                    val parseObject = parseObject(payload)
+                    var find = false
+                    for (bind in mqttMessageBindingList) {
+                        find = bind.buildMessage(parseTopic, parseObject)
+                        if (find) break
+                    }
+                    if (!find) log.warn("丢弃一个无效信息：$payload")
+                } catch (ignore: Throwable) {
+                    log.warn("丢弃一个无效信息：$payload")
+                }
             }
-            if (!find) log.warn("丢弃一个无效信息：$payload")
         }
         subscribeTopicList.forEach { sub ->
             if (sub.interrupt()) {

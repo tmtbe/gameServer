@@ -3,6 +3,7 @@ package com.tmtbe.frame.gameserver.framework.message
 import com.alibaba.fastjson.JSONObject
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager
 import com.tmtbe.frame.gameserver.framework.scene.Scene
+import com.tmtbe.frame.gameserver.framework.utils.log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +24,7 @@ data class MqttMessage<T>(
 }
 
 abstract class MqttMessageBinding<T : Any> {
+    private val log = log()
     private val mqttIndex: Int = 0
 
     @Autowired
@@ -37,18 +39,23 @@ abstract class MqttMessageBinding<T : Any> {
     fun buildMessage(topic: TopicTemplate.TopicParse, payload: JSONObject): Boolean {
         val type = payload.getString("type")
         val className = getClassName(type) ?: return false
-        val body = payload.getJSONObject("body")?.toJavaObject(className)
-        val mqttMessage = MqttMessage(payload.getString("requestId"), type, body, topic)
-        val sceneName = mqttMessage.topicParse.scene
-        val scene = resourceManager.getScene(sceneName) ?: serverError("没有该场景：${sceneName}")
-        GlobalScope.launch {
-            try {
-                handleMessage(mqttMessage, scene)
-            } catch (e: ErrorMessageException) {
-                responseError(mqttMessage, e)
-            } catch (ignore: BreakException) {
+        try {
+            val body = payload.getJSONObject("body")?.toJavaObject(className)
+            val mqttMessage = MqttMessage(payload.getString("requestId"), type, body, topic)
+            val sceneName = mqttMessage.topicParse.scene
+            val scene = resourceManager.getScene(sceneName) ?: serverError("没有该场景：${sceneName}")
+            GlobalScope.launch {
+                try {
+                    handleMessage(mqttMessage, scene)
+                } catch (e: ErrorMessageException) {
+                    responseError(mqttMessage, e)
+                } catch (ignore: BreakException) {
+
+                }
 
             }
+        } catch (ignore: Throwable) {
+            log.warn("消息解析出错", ignore)
         }
         return true
     }

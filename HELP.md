@@ -19,12 +19,12 @@ Topic： REQUEST/client2/demoB/all
 
 { "requestId": "123","type":"LeaveRoomMsg","body": {"roomName":"1583811395562"} }
 
-#匹配
+# 匹配
 Topic： REQUEST/client2/demoB/all
 
 { "requestId": "123","type":"MatchMsg","body": {"roomLevel":"high"} }
 
-#取消匹配
+# 取消匹配
 Topic： REQUEST/client2/demoB/all
 
 { "requestId": "123","type":"CancelMatchMsg","body": {"roomLevel":"high"} }
