@@ -104,7 +104,7 @@ abstract class Scene(
     }
 
     fun hasRoom(roomName: String): Boolean {
-        return roomActors.containsKey("$name/$roomName")
+        return roomActors.containsKey(roomName)
     }
 }
 
