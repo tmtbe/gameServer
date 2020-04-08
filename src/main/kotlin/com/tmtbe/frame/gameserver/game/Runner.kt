@@ -32,7 +32,7 @@ class Runner(val resourceManager: ResourceManager,
                  }
                  delay(10)
              }*/
-            val result = accountClient.getUserInfo("").awaitFirst()
+            val result = accountClient.getUserInfo("b4904db638f991d6706148079b4f6ebf").awaitFirst()
             println(result)
         }
     }
