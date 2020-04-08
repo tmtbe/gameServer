@@ -3,14 +3,18 @@ package com.tmtbe.frame.gameserver.game
 import com.tmtbe.frame.gameserver.framework.scene.ResourceManager
 import com.tmtbe.frame.gameserver.framework.service.EMQAcl
 import com.tmtbe.frame.gameserver.framework.service.EMQService
+import com.tmtbe.frame.gameserver.game.client.AccountClient
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 
 @Component
 class Runner(val resourceManager: ResourceManager,
-             val emqService: EMQService) : CommandLineRunner {
+             val emqService: EMQService,
+             val accountClient: AccountClient
+) : CommandLineRunner {
     override fun run(vararg args: String?) {
         val usernameList = arrayListOf("client", "client2", "client3", "client4")
         GlobalScope.launch {
@@ -28,6 +32,8 @@ class Runner(val resourceManager: ResourceManager,
                  }
                  delay(10)
              }*/
+            val result = accountClient.getUserInfo("").awaitFirst()
+            println(result)
         }
     }
 }

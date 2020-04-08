@@ -10,11 +10,33 @@ interface AccountClient {
     @GetMapping("/v1/User/Info")
     fun getUserInfo(
             @RequestHeader("token") token: String
-    ): Mono<UserInfoResult>
+    ): Mono<APIResult<UserInfo>>
 }
 
-
-data class UserInfoResult(
-        val code: Int,
-        val msg: String
+data class UserInfo(
+        val ssc: Int? = null,
+        val title: String? = null,
+        val experience: Int? = null,
+        val pc28: Int? = null,
+        val syx5: Int? = null,
+        val isSafePwd: Int? = null,
+        val nickname: String? = null,
+        val id: Int? = null,
+        val isMobile: Int? = null,
+        val fc3d: Int? = null,
+        val chess: Int? = null,
+        val level: String? = null,
+        val lhc: Int? = null,
+        val mobile: String? = null,
+        val k3: Int? = null,
+        val isagent: String? = null,
+        val lastLoginArea: String? = null,
+        val avatar: String? = null,
+        val pk10: Int? = null,
+        val isSafeQuestion: Int? = null,
+        val lasttime: String? = null,
+        val money: Double? = null,
+        val safeLevel: Int? = null,
+        val pl3: Int? = null,
+        val username: String? = null
 )
